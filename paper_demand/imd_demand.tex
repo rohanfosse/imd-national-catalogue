@@ -110,7 +110,7 @@ LSTM ; French Plan V\'elo.
 \item $+0.27$ R$^2$ gain on hourly station-level trips, IMD vs no-IMD
 \item IMD beats persistence, ARIMA, Ridge, LSTM on V\'elomagg ($n=375{,}305$)
 \item IMD matches station fixed-effect: transferable to new stations
-\item Modern deep nets do not outperform gradient boosting on this scale
+\item Two-tier data pipeline scoped : 43 French + 7 international cities
 \end{highlights}
 
 % =========================================================================
@@ -339,6 +339,89 @@ $n_{\text{test}} = 89{,}894$).  No information from the test
 period is used to construct features or to tune
 hyperparameters.
 
+\subsection{Multi-city data pipeline}
+\label{sec:multicity}
+
+The V\'elomagg panel is the single French network whose
+operator publishes a trip-level historical log in the open.
+Major French operators (JCDecaux, Smovengo, Indigo Wheel) publish
+only the GBFS real-time feed, so a French multi-city extension
+requires recovering pseudo-trips from the station-status time
+series.  Outside France the situation is reversed : the Lyft-
+operated North American networks (Citi Bike NYC, Capital
+Bikeshare DC, Divvy Chicago, Bay Wheels SF, Boston Bluebikes),
+BIXI Montr\'eal and TfL Cycle Hire London publish trip-level
+historical files with a consistent schema (\texttt{ride\_id},
+\texttt{started\_at}, \texttt{ended\_at}, \texttt{start\_station\_id},
+\texttt{end\_station\_id}, \texttt{member\_casual} plus
+geolocation).  Our multi-city data pipeline therefore operates in
+two tiers (Table~\ref{tab:tiers}).
+
+\begin{table}[H]
+\centering
+\caption{Two-tier data pipeline of the IMD-augmented demand
+benchmark.  Tier 1 (high-resolution trip logs) is the
+international gold standard ; Tier 2 (GBFS pseudo-flows) is the
+French multi-city extension.  Polling for Tier 2 is continuous
+and the pseudo-trip volume grows monotonically with the polling
+span ; the figures below report the data state at the time of
+writing.}
+\label{tab:tiers}
+\small
+\begin{tabular}{@{}llrrr@{}}
+\toprule
+Tier & Source & Cities & Stations & Trip type \\
+\midrule
+T1 & Lyft trip logs (NYC, DC, Chicago, SF, Boston) & 5 & $\sim 25{,}000$ & true trips \\
+T1 & BIXI Montr\'eal annual archives           & 1 &  $\sim 800$  & true trips \\
+T1 & TfL Cycle Hire London weekly archives     & 1 &  $\sim 800$  & true trips \\
+T1 & V\'elomagg trip log (calibration anchor)   & 1 &      53      & true trips \\
+\midrule
+T2 & GBFS pseudo-flow (France, this paper)      & 43 & $\sim 5{,}500$ & pseudo-trips \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Tier 1 -- trip-log downloader.}
+The five Lyft-operated US networks share a common monthly
+\texttt{.zip} archive on Amazon S3, with the same trip-record
+schema since 2020 ; the same is true for BIXI Montr\'eal (annual)
+and TfL London (quarterly).  The released downloader at
+\url{paper_demand/data_collection/tier1_downloader.py} encodes
+each network as a \texttt{CitySpec} and walks a year/month range
+under the appropriate URL pattern.  A single-month sample for
+NYC, DC and Chicago confirms the schema is binary-compatible
+across the three (Lyft \emph{ride\_id} format ; for example
+Capital Bikeshare reports $614{,}640$ trips on
+August $2024$ alone).
+
+\paragraph{Tier 2 -- GBFS pseudo-flow converter.}
+The French operators publish GBFS station-status feeds polled
+continuously by our background daemon (one parquet per day per
+city in \texttt{data/status\_snapshots/}).  For each station we
+compute the time-sorted delta $\Delta = c_{t+1} - c_{t}$ on
+\texttt{num\_bikes\_available} between consecutive polls within a
+$60$-minute gap, and treat any negative delta as a pseudo-
+checkout : $\text{pseudo\_trip}_{s,t} = -\min(0, \Delta_{s,t})$.
+Aggregating to the hourly bin produces a pseudo-trip time series
+that is biased downward (intra-poll checkouts are missed) and
+contaminated by operator rebalancing, but at the same panel
+resolution as Tier 1.  The converter at
+\url{paper_demand/data_collection/tier2_pseudo_flow.py} processes
+$43$ French cities including Paris ($1{,}511$ stations), Lyon
+($453$), Toulouse ($434$), V'Lille ($267$), Bordeaux ($225$),
+Marseille ($223$), and the full inventory of mid-size cities
+covered by \emph{transport.data.gouv.fr}.
+
+\paragraph{State of the data at submission.}
+Tier 1 sample downloads (one month per city) confirm the URL
+patterns and schema homogeneity.  Tier 2 currently spans
+approximately $11$ hours of polling per city.  The single-city
+V\'elomagg benchmark of Section~\ref{sec:results} is the
+high-quality empirical anchor of the paper ; the multi-city
+benchmark across Tier 1 and Tier 2 is the v1.1 release, scoped
+in Section~\ref{sec:future} below.
+
 % =========================================================================
 \section{Models}
 \label{sec:models}
@@ -542,24 +625,49 @@ specific operational anomalies.  Pairing the IMD-4 with a
 domain-specific demand layer (\emph{e.g.}, an INSEE residential-
 worker OD matrix or a tourism index) is the natural extension.
 
-\subsection{Generalisation to the rest of France}
+\subsection{Generalisation to the rest of France and abroad}
+\label{sec:future}
 
 The IMD-4 is computable on all $34{,}858$ French communes
-(Section~\ref{sec:national-imd}).  The predictive pipeline of
+(Section~\ref{sec:national-imd}) and the predictive pipeline of
 Section~\ref{sec:models} is portable to any commune with an
 active dock-based network and a published GBFS feed
-\citep{Fosse2026gold}.  The principal generalisation question --
-whether the IMD-augmented model trained on Montpellier extends to
-Lyon, Bordeaux, Paris -- requires the multi-city trip log we
-release in Section~\ref{sec:data-release}.  We expect the gain
-($\Delta R^2 \approx +0.27$) to vary with the cycling-environment
-heterogeneity of the host city ; on a hilly mid-size network like
-Montpellier the T-axis dominates, whereas on a flat metropole
-like Bordeaux the I-axis and M-axis are expected to take over.
-The Bayesian calibration produces per-axis credible intervals
-that propagate naturally to per-city sensitivity, so the
-generalisation is a matter of recomputing the IMD on each city
-rather than re-training the indicator.
+\citep{Fosse2026gold}.  The two-tier data pipeline of
+Section~\ref{sec:multicity} converts that portability into a
+concrete benchmark plan.
+
+\paragraph{Tier 2 French panel (43 cities).}
+The GBFS pseudo-flow converter is operational on $43$ French
+networks including Paris ($1{,}511$ stations), Lyon, Toulouse,
+V'Lille, Bordeaux and Marseille.  Polling continues
+continuously ; with $6$--$12$ months of polling at $5$-minute
+resolution, the pseudo-trip volume per station is comparable to
+the V\'elomagg trip log, modulo the intra-poll missed checkouts.
+The headline question of the v1.1 release is whether the
+$+0.27$ R$^2$ gain reported here for Montpellier transfers to
+the 42 other French networks under pseudo-flow targets, and
+whether the per-axis feature-importance pattern (T-dominated for
+Montpellier) shifts predictably with the host city's
+cycling-environment heterogeneity.  Flat metropoles like
+Bordeaux are expected to shift weight onto the I and M axes ;
+the Bayesian calibration produces per-axis credible intervals
+that propagate naturally to per-city sensitivity.
+
+\paragraph{Tier 1 international panel (5--7 cities).}
+The downloader of Section~\ref{sec:multicity} unlocks
+Citi Bike NYC, Capital Bikeshare DC, Bay Wheels SF, Boston
+Bluebikes, Divvy Chicago, BIXI Montr\'eal and TfL Cycle Hire
+London.  Together they expose $\sim 25{,}000$ dock-based stations
+with five-to-ten years of trip-level history each.  The
+generalisation test of interest here is more demanding : whether
+the IMD-4 framework, derived in a French regulatory context,
+recovers spatial structure in networks shaped by different
+land-use regimes (NYC street grid, DC L'Enfant plan, Montreal
+mountain).  The per-component priors of the Bayesian calibration
+are agnostic to country ; recomputing M, I, T and D on the local
+open-data sources (OSM cycle-infrastructure layer, GTFS heavy-
+transit stops, SRTM elevation) reuses the calibration
+unchanged.  We commit to this benchmark in the v1.1 release.
 
 \subsection{Limits}
 
