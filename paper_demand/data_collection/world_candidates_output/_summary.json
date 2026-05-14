@@ -1,0 +1,14 @@
+{
+  "n_total_audited": 1504,
+  "n_eligible": 185,
+  "n_tier1": 20,
+  "n_tier2": 165,
+  "n_stations_eligible": 43806,
+  "n_stations_tier1": 12040,
+  "n_stations_tier2": 31766,
+  "n_countries_eligible": 31,
+  "thresholds": {
+    "n_min": 20,
+    "max_a7_share": 0.1
+  }
+}
