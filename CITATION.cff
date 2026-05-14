@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+title: IMD National Catalogue
+message: >-
+  If you use this catalogue, please cite both the paper and the
+  Zenodo deposit (once minted) using the metadata below.
+type: dataset
+authors:
+  - family-names: Fossé
+    given-names: Rohan
+    email: rfosse@cesi.fr
+    affiliation: CESI École d'Ingénieurs, Montpellier, France
+  - family-names: Pallares
+    given-names: Gaël
+    affiliation: CESI LINEACT (EA 7527), Montpellier, France
+repository-code: "https://github.com/rohanfosse/imd-national-catalogue"
+abstract: >-
+  A commune-resolution reference dataset for the Indice de Mobilité
+  Douce (IMD) and the Indice d'Équité Sociale (IES), covering 34,858
+  French communes. The IMD is a four-component composite
+  (Multimodality, Infrastructure, Safety, Topography) whose weights
+  are calibrated by Bayesian simplex against the Baromètre FUB and
+  the EMP 2019; the IES flags communes that under-perform relative
+  to their socio-economic profile (cycling-poverty deserts).
+keywords:
+  - IMD
+  - composite indicator
+  - cycling environment
+  - spatial equity
+  - shared mobility
+  - open data
+  - reproducibility
+  - FAIR
+license: ODbL-1.0
+license-url: "https://opendatacommons.org/licenses/odbl/1-0/"
+version: 0.1.0
+date-released: "2026-05-14"
+preferred-citation:
+  type: article
+  title: >-
+    A National Cycling-Environment Composite Indicator for French
+    Communes: The IMD and the Cycling-Poverty Deserts
+  authors:
+    - family-names: Fossé
+      given-names: Rohan
+    - family-names: Pallares
+      given-names: Gaël
+  year: 2026
+  notes: >-
+    Manuscript in preparation; submission target: Transportation
+    Research Part D / Transport Policy / Journal of Transport Geography

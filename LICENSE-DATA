@@ -1,0 +1,45 @@
+Open Data Commons Open Database License (ODbL) v1.0
+====================================================
+
+The IMD National Catalogue (data files in `catalogue/`, the Zenodo
+deposit minted at v1.0.0, and the Hugging Face mirror at
+https://huggingface.co/datasets/rohanfosse/imd-national-catalogue)
+is licensed under the Open Data Commons Open Database License v1.0.
+
+You are free to:
+  * share -- copy, distribute and use the database
+  * create -- produce works from the database
+  * adapt -- modify, transform and build upon the database
+
+As long as you:
+  * attribute -- cite the dataset (see CITATION.cff or the README's
+    Citation section) in any public work that uses it
+  * share-alike -- if you publicly use a derivative database, you must
+    offer it under the ODbL
+  * keep open -- if you redistribute the database or a substantial
+    portion of it, you must do so under the ODbL with no additional
+    restrictions
+
+Full licence text:
+  https://opendatacommons.org/licenses/odbl/1-0/
+
+----------------------------------------------------------------------
+
+Upstream data attributions (under the licences listed):
+
+  * GBFS Audit Catalogue (sister dataset) -- ODbL v1.0
+        https://huggingface.co/datasets/rohanfosse/gbfs-audit-catalogue
+  * GBFS feeds                  -- ODbL via transport.data.gouv.fr
+  * INSEE Filosofi (income)     -- Licence Ouverte v2.0 (Etalab)
+  * INSEE Recensement           -- Licence Ouverte v2.0 (Etalab)
+  * INSEE Communes (geometry)   -- Licence Ouverte v2.0 (Etalab)
+  * BAAC (ONISR, safety)        -- Licence Ouverte v2.0 (Etalab)
+  * BD TOPO / BD ALTI 25 m      -- Open Licence (IGN)
+  * OpenStreetMap               -- ODbL
+  * Cerema indicator (baseline) -- Licence Ouverte v2.0
+  * FUB Baromètre Vélo          -- Creative Commons BY-NC-ND 4.0
+  * EMP 2019                    -- Licence Ouverte v2.0 (Etalab)
+
+The IMD National Catalogue is a derivative work that respects each
+upstream licence; attribution is given in the published paper and in
+the audit report bundled with the dataset release.

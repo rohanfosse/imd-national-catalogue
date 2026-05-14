@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "imd-national-catalogue"
+version = "0.1.0"
+description = "A reproducible commune-level IMD/IES catalogue for 34,858 French communes"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Rohan Fossé", email = "rfosse@cesi.fr"},
+    {name = "Gaël Pallares"},
+]
+keywords = ["IMD", "bike-sharing", "cycling", "composite indicator",
+            "spatial equity", "open mobility data", "FAIR",
+            "reproducibility", "smart city"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+dependencies = [
+    "pandas>=2.0.0",
+    "numpy>=1.26.0",
+    "pyarrow>=14.0.0",
+    "scipy>=1.11.0",
+]
+
+[project.optional-dependencies]
+app = ["streamlit>=1.35.0", "pydeck>=0.9.0"]
+notebook = ["jupyter>=1.0.0", "ipykernel>=6.25.0"]
+hub = ["datasets>=4.0.0", "huggingface_hub[cli]>=1.0.0"]
+test = ["pytest>=7.4.0", "pytest-cov>=4.1.0"]
+all = ["streamlit>=1.35.0", "pydeck>=0.9.0",
+       "jupyter>=1.0.0", "ipykernel>=6.25.0",
+       "datasets>=4.0.0", "huggingface_hub[cli]>=1.0.0",
+       "pytest>=7.4.0", "pytest-cov>=4.1.0"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -q"
+
+[project.urls]
+Repository = "https://github.com/rohanfosse/imd-national-catalogue"
+SisterCatalogue = "https://github.com/rohanfosse/gbfs-audit-catalogue"
+
+[tool.setuptools.packages.find]
+include = ["imd_pipeline*"]
+exclude = ["catalogue*", "paper*", "huggingface*", "notebooks*",
+           "app*", "experiments*", "scripts*", "tests*"]
