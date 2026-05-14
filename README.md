@@ -6,13 +6,35 @@
 
 [![Code: MIT](https://img.shields.io/badge/code-MIT-green)](LICENSE)
 [![Data: ODbL](https://img.shields.io/badge/data-ODbL%20v1.0-blue)](LICENSE-DATA)
-[![Status](https://img.shields.io/badge/status-v0.1%20scaffold-orange)](#roadmap)
+[![Status](https://img.shields.io/badge/status-v0.2%20beta-yellow)](#roadmap)
 
-> **Status — v0.1 scaffold.** This repository ships the licensing,
-> package layout and citation metadata. The Parquet catalogue, the
-> Hugging Face dataset, the Streamlit dashboard and the Zenodo DOI are
-> being staged in [the roadmap below](#roadmap). Pin to a tagged
-> release once `v1.0.0` is cut.
+> **Status — v0.2 beta.** The Parquet catalogue, the scoring pipeline
+> and a 13-test suite are in. The Hugging Face dataset, the Streamlit
+> dashboard and the Zenodo DOI are staged for the upcoming `v1.0.0`
+> tag — see the [roadmap](#roadmap) for what remains.
+
+## Quick start (local, no Hugging Face yet)
+
+```bash
+git clone https://github.com/rohanfosse/imd-national-catalogue.git
+cd imd-national-catalogue
+python -m venv .venv && source .venv/bin/activate
+pip install -e ".[test]"
+
+# Rebuild the Parquet from the bundled CSV sources
+python scripts/regenerate.py
+
+# Run the schema + value tests
+pytest -v
+
+# Use the catalogue
+python -c "
+import pandas as pd
+df = pd.read_parquet('catalogue/communes_imd_national.parquet')
+print(df.shape, '— 17 columns:', list(df.columns))
+print('deserts:', int(df['double_penalty'].sum()))
+"
+```
 
 ## What this is
 
@@ -40,7 +62,29 @@ Headline results (Paper 04):
 * ρ(IMD, median income) = +0.001 in the urban subset — the IMD is
   **not** a wealth proxy.
 
-## Quick start (once v1.0.0 is published)
+## Schema
+
+`catalogue/communes_imd_national.parquet` (34,858 rows × 17 cols, zstd-compressed, ~2.5 MB):
+
+| Column | Type | Meaning |
+|---|---|---|
+| `code_commune` | string | INSEE COG 2024 commune code (PK, leading zeros preserved) |
+| `nom` | string | Commune name |
+| `population` | Int64 | Population (INSEE) |
+| `surface_km2` | float | Commune surface |
+| `M_per_km2` | float | Multimodality density (heavy-transit stations / km²) |
+| `I_per_km2` | float | Infrastructure density (cyclable-km / km²) |
+| `D_log` | float | log Population density |
+| `M_z`, `I_z`, `D_z` | float | National-panel z-scores of the three components |
+| `IMD4_national` | float | Composite IMD-4 score (Bayesian weights from B7) |
+| `insee_part_velo` | float | Reference: INSEE part-vélo-travail 2022 (%) |
+| `income_median` | float / NaN | Niveau de vie médian, EUR/UC (INSEE Filosofi) |
+| `poverty_rate` | float / NaN | Taux de pauvreté, % (INSEE Filosofi) |
+| `IES` | float / NaN | Indice d'Équité Sociale (residual after log income) |
+| `ies_available` | bool | True for the 31,266 communes with Filosofi income |
+| `double_penalty` | bool | True for the 362 cycling-poverty deserts |
+
+## Once v1.0.0 is published on Hugging Face
 
 ```python
 from datasets import load_dataset
@@ -48,8 +92,7 @@ from datasets import load_dataset
 imd = load_dataset("rohanfosse/imd-national-catalogue", split="train").to_pandas()
 
 # The 362 priority deserts: high social fragility, low IMD
-deserts = imd.query("ies_quintile == 1 and population >= 5000") \
-             .nsmallest(362, "imd4_national")
+deserts = imd[imd["double_penalty"]].sort_values("IMD4_national")
 ```
 
 ## Companion artefacts
@@ -65,18 +108,19 @@ deserts = imd.query("ies_quintile == 1 and population >= 5000") \
 
 ## Roadmap
 
-* **Phase 1 — Scaffold** (this commit). Licensing, README, package
-  layout, citation metadata.
-* **Phase 2 — Pipeline & catalogue.** Port the `b20_national_imd4.py`
-  and `b21_national_ies.py` scoring scripts into the `imd_pipeline/`
-  package and materialise `catalogue/communes_imd_national.parquet`
-  (34,858 rows). Adds tests on schema, z-score bounds, and
-  Cerema-residual consistency.
-* **Phase 3 — Hugging Face.** Dataset card with explicit recipes
-  (top-15 deserts, jointure INSEE, Cerema-vs-IMD comparison) and
-  Croissant metadata.
+* **Phase 1 — Scaffold** *(done)*. Licensing, README, package layout,
+  citation metadata.
+* **Phase 2 — Pipeline & catalogue** *(done, v0.2)*. `imd_pipeline.core`
+  ports the b20/b21 join, `scripts/regenerate.py` materialises
+  `catalogue/communes_imd_national.parquet` (34,858 × 17), and 13
+  tests pin the schema and headline counts (362 deserts, 31,266 with
+  IES).
+* **Phase 3 — Hugging Face** *(next)*. Dataset card with explicit
+  recipes (top-15 deserts, INSEE join, Cerema-vs-IMD comparison) and
+  Croissant metadata; upload to `rohanfosse/imd-national-catalogue`.
 * **Phase 4 — Streamlit.** Commune-level map with strata filters,
-  IES double-penalty layer, M / I / S / T decomposition tab.
+  IES double-penalty layer, M / I / D decomposition tab; deploy at
+  `imd-national.streamlit.app`.
 * **Phase 5 — Zenodo.** `v1.0.0` tag, archived DOI, cite-as updated
   across the paper, the dataset card and `CITATION.cff`.
 
