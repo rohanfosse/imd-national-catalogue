@@ -45,6 +45,11 @@
 \newcommand{\IMD}{\mathrm{IMD}}
 \newcommand{\IES}{\mathrm{IES}}
 
+\newenvironment{highlights}{%
+  \par\noindent\textbf{\large Highlights}\par\smallskip
+  \begin{itemize}[leftmargin=1.4em,itemsep=0.15em,topsep=0.2em]}{%
+  \end{itemize}\par\medskip}
+
 % =========================================================================
 \title{\Large\bfseries A national cycling-environment composite indicator
 for French communes:\\
@@ -64,65 +69,50 @@ for French communes:\\
 \begin{abstract}
 \noindent
 We introduce the \textbf{IMD-4} (\emph{Indice de Mobilit\'e Douce}),
-an annually-refreshable composite indicator of cycling-environment
-quality computable on every French commune from public data alone.  The IMD-4 combines
-four supply-side axes -- transit multimodality (M), cycling infrastructure
-density (I), topography (T), and population density (D) -- under a
-Bayesian simplex prior that yields a posterior distribution on the
-component weights and on every commune-level score.
+an annually-refreshable Bayesian composite indicator of cycling-
+environment quality on every French commune.  The IMD-4 combines
+four supply-side axes -- heavy-transit multimodality (M), cycling
+infrastructure density (I), topography (T) and population density
+(D) -- under a simplex prior with posterior credible intervals on
+every per-commune score.
 
-Using a 59-city dock-based bike-sharing panel for weight calibration,
-we validate the IMD-4 against \textbf{five independent reference series}:
-the FUB perception barometer ($n=32$), the EMP modal-share survey
-($n=44$), eco-counter daily flow ($n=25$), the BAAC cyclist-accident
-rate ($n=44$), and the INSEE recensement part-v\'elo-travail ($n=58$).
-The IMD-4 obtains the strongest correlation on four of the five
-references; against the largest panel (INSEE, $n=58$) it reaches
-$\rho = +0.62$ ($95\,\%$ CI $[+0.39, +0.78]$), out-of-sample
-$\rho = +0.42$ in 5-fold cross-validation.  Compared with the standard
-Cerema cycling-infrastructure density (the de facto national
-indicator), the IMD-4 adds $+18\,$ percentage points of $R^2$ in
-explaining the INSEE part-v\'elo-travail
-($R^2_{\text{Cerema}} = 0.30 \to R^2_{\text{Cerema} + \IMD\text{-resid}} = 0.48$).
+The headline finding is a $+18$ percentage-point gain in $R^2$
+over the de facto national standard, the Cerema cycling-
+infrastructure density, in explaining the INSEE part-v\'elo-
+travail ($R^2: 0.30 \to 0.48$ on $n=42$ communes ; bootstrap CI
+on the marginal coefficient $[+0.07, +0.85]$, strictly excluding
+zero).  Validated against five independent behavioural references
+(FUB perception, EMP modal share, eco-counter flow, BAAC accident
+rate, INSEE recensement), the IMD-4 wins on four of five.  It
+generalises out-of-sample ($\rho = +0.42$ in 5-fold
+cross-validation) and extends to all $34{,}858$ French communes
+with a national correlation $\rho = +0.55$ on the 42 largest
+cities, indistinguishable from the calibration result.  Within
+urban communes ($\geq 5{,}000$ inhabitants) the IMD-4 is
+orthogonal to income ($\rho = +0.001$), rebutting the natural
+wealth-proxy critique.
 
-We then extend the IMD-4 to \textbf{all $34{,}858$ French communes}
-using nationally-published commune-level indicators of cycling
-infrastructure, transit-station density, and population density.
-On the resulting national panel the IMD-4 correlates with the
-INSEE part-v\'elo-travail at $\rho = +0.41$ overall and $\rho = +0.55$
-on the 42 largest cities -- a value indistinguishable from the
-calibration panel.  Within urban communes ($\geq 5{,}000$
-inhabitants) the IMD-4 is essentially orthogonal to commune income
-($\rho = +0.001$), confirming that the indicator does not reduce to a
-wealth proxy.
-
-We use the national IMD-4 together with INSEE commune income and
-poverty data to compute a \textbf{national Equity Index (IES)}: the
-residual of the IMD-4 after projecting onto log-income.  We identify
-\textbf{362 ``double-penalty'' communes} that combine a below-median
-IMD-4 with a poverty rate above $15\,\%$ -- $8.2\,\%$ of all communes
-with both indicators.  Among the most populous of these, six out of
-the top fifteen are in La R\'eunion (Saint-Paul, Le Tampon, Saint-Louis,
-Saint-Joseph, Saint-Beno\^it, Sainte-Marie) -- evidence that overseas
-\emph{d\'epartements} bear a disproportionate share of the national
-cycling-equity gap.  A regional decomposition by current political
-regime shows a small commune-mean difference between right- and
-left-led regions, fully explained by the structural over-representation
-of \^Ile-de-France in the right-led aggregate ; the IMD-4 captures a
-geographic-demographic gradient, not a partisan one.
-
-\noindent\textbf{Headline contributions.}
-(i) First commune-resolution composite cycling-environment indicator
-computable annually on every French commune from public data alone ;
-(ii) a $+18\,$pt $R^2$ improvement over the Cerema baseline in
-predicting commune-level cycling commute share ; (iii) the first
-national cycling-equity diagnostic at commune resolution, with an
-actionable list of $362$ priority communes for the Plan V\'elo.
+Combined with INSEE income and poverty data the IMD-4 identifies
+\textbf{362 ``double-penalty'' communes} -- below the IMD-4 33rd
+percentile and above the $15\,\%$ poverty threshold -- that the
+Plan V\'elo could prioritise.  A per-commune binding-axis
+diagnostic on this list shows that $62\,\%$ are infrastructure-
+limited, $33\,\%$ transit-limited and $5\,\%$ density-limited,
+converting the scalar indicator into an actionable policy lever.
+Pipeline, data, and per-commune scores are released under MIT.
 
 \noindent\textbf{Keywords:}
 cycling environment ; composite indicator ; commune-level monitoring ;
 mobility equity ; Bayesian inference ; French Plan V\'elo.
 \end{abstract}
+
+\begin{highlights}
+\item Composite cycling-environment indicator on all $34{,}858$ French communes
+\item $+18$\,pp $R^2$ gain over Cerema baseline on INSEE part-v\'elo-travail ($n=42$)
+\item IMD-4 wins 4 of 5 benchmarks against FUB, EMP, eco-counter, BAAC, INSEE
+\item Orthogonal to commune income in urban subset ($\rho=+0.001$, $n=31{,}266$)
+\item $362$ cycling-poverty deserts with per-axis bottleneck for Plan V\'elo targeting
+\end{highlights}
 
 % =========================================================================
 \section{Introduction}
@@ -203,23 +193,27 @@ We answer four questions :
 \end{enumerate}
 
 \noindent\textbf{Contributions.}
-\textbf{(C1)} A station-level Bayesian formulation of the cycling-
-environment composite (Section~\ref{sec:methods}) with a posterior
-on the simplex of component weights and per-station / per-commune
-posterior credible intervals.
+\textbf{(C1)} A Bayesian-calibrated four-axis composite
+specification for French commune-level cycling-environment,
+calibrated jointly against the FUB perception barometer and
+EMP modal-share survey, with posterior credible intervals
+propagated to every per-commune score (Section~\ref{sec:methods}).
 \textbf{(C2)} A head-to-head benchmark of the IMD-4 against four
 alternative metrics on five independent references
 (Section~\ref{sec:tournament}), with bootstrap and leave-one-out
 robustness checks.
-\textbf{(C3)} The first commune-resolution national application of
-the indicator and its joint distribution with INSEE part-v\'elo-travail
-on $34{,}858$ communes (Section~\ref{sec:national}).
-\textbf{(C4)} A national cycling-Equity Index (IES) and its operational
-output : a ranked list of $362$ ``double-penalty'' communes that the
-Plan V\'elo could prioritise (Section~\ref{sec:ies}).
-\textbf{(C5)} A falsification test by regional political regime
-showing that the geographic-demographic signal captured by the
-IMD-4 is not a partisan artefact (Section~\ref{sec:regional}).
+\textbf{(C3)} The first commune-resolution national application
+of the indicator and its joint distribution with INSEE part-v\'elo-
+travail on $34{,}858$ communes (Section~\ref{sec:national}).
+\textbf{(C4)} A national cycling-Equity Index (IES) and its
+operational output : a ranked list of $362$ ``double-penalty''
+communes that the Plan V\'elo could prioritise
+(Section~\ref{sec:ies}), together with a per-commune binding-axis
+diagnostic that converts the scalar IMD-4 into an actionable
+policy lever (Section~\ref{sec:bottleneck}).  An additional
+robustness check by regional political regime
+(Section~\ref{sec:regional}) shows that the geographic-demographic
+signal captured by the IMD-4 is not a partisan artefact.
 
 \noindent\textbf{Data and code.}  All inputs are public.  The full
 pipeline -- collection, calibration, validation, national application
@@ -249,8 +243,11 @@ quality :
 
     \item[\textbf{I -- Cycling infrastructure.}]  Total km of
           dedicated cycling infrastructure per km$^2$ (all
-          \emph{am\'enagements cyclables} types : pistes, bandes,
-          voies vertes, voies bus partag\'ees, double-sens, mixtes).
+          \emph{am\'enagements cyclables} types : segregated paths
+          \emph{pistes}, on-road lanes \emph{bandes}, green-ways
+          \emph{voies vertes}, shared bus lanes \emph{voies bus
+          partag\'ees}, contraflow \emph{double-sens}, and mixed
+          configurations).
           Infrastructure density is the supply-side variable most
           consistently associated with cycling commute share in the
           international literature
@@ -313,11 +310,15 @@ $(w_M, w_I, w_T, w_D) = (0.78, 0.07, 0.08, 0.06)$.
 
 We use the 59 French cities with active dock-based bike-sharing
 systems and a complete Gold Standard GBFS feed \citep{Fosse2026gold},
-totalling $5{,}442$ stations.
-The panel structurally over-samples urban France : every panel city
-has more than $5{,}000$ inhabitants and an Autorit\'e Organisatrice
-de la Mobilit\'e ; this is the operational scale at which the IMD-4
-is meant to inform cycling policy.
+totalling $5{,}442$ stations.  The sampling frame is the $123$
+French GBFS-publishing systems inventoried on
+\emph{transport.data.gouv.fr} \citep{Fosse2026gold}, from which
+the $59$-city panel is the subset with dock-based deployments
+above $N_{\min} = 20$ stations.  The panel structurally over-
+samples urban France : every panel city has more than $5{,}000$
+inhabitants and an Autorit\'e Organisatrice de la Mobilit\'e ;
+this is the operational scale at which the IMD-4 is meant to
+inform cycling policy.
 
 % =========================================================================
 \section{Validation : head-to-head tournament}
@@ -331,13 +332,14 @@ Cerema km / km$^2$, multimodality M alone)
 against five reference series :
 
 \begin{itemize}[label=$\bullet$,leftmargin=*]
-    \item \emph{FUB Barom\`etre V\'elo 2023} -- perception ($n=32$
-          cities) ;
-    \item \emph{EMP 2019} part-v\'elo modal share -- household
-          survey ($n=44$) ;
-    \item \emph{Eco-counter} daily flow -- observed activity ($n=25$) ;
-    \item \emph{BAAC} cyclist-accident rate -- safety proxy
-          \citep{Reynolds2009,Schepers2014} ($n=44$) ;
+    \item \emph{FUB Barom\`etre V\'elo 2023} (latest edition) --
+          perception ($n=32$ cities) ;
+    \item \emph{EMP 2018--2019} part-v\'elo modal share --
+          household survey ($n=44$) ;
+    \item \emph{Eco-counter} daily flow 2022--2023 -- observed
+          activity ($n=25$) ;
+    \item \emph{BAAC 2018--2022} cyclist-accident rate -- safety
+          proxy \citep{Reynolds2009,Schepers2014} ($n=44$) ;
     \item \emph{INSEE part-v\'elo-travail 2022} -- exhaustive
           recensement at commune level ($n=58$).
 \end{itemize}
@@ -364,7 +366,11 @@ against eco-counter ($+0.71$ vs IMD-4 $+0.75$) and INSEE recensement
 \caption{Five-reference tournament : Spearman $\rho$ (and
 $1{,}000$-resample $95\,\%$ bootstrap CI) of each candidate metric
 against each behavioural / outcome reference.  Bold marks the
-strongest correlation per column.  The IMD-4 wins four of five.}
+strongest correlation per column.  The IMD-4 wins four of five.
+\emph{Caution :} column $n$ varies from $25$ (eco-counter) to
+$58$ (INSEE recensement), so the across-column ordering of
+$\rho$ values is not power-corrected ; the within-column
+ordering is the inferential object of the tournament.}
 \label{tab:tournament}
 \small
 \begin{tabular}{@{}lccccc@{}}
@@ -408,6 +414,30 @@ five IMD-4 bootstrap CIs all strictly exclude zero ; the most
 influential city is Strasbourg (the top-ranked metropole on three
 of the five references), which is the indicator's strength rather
 than fragility.
+
+\paragraph{No spatial autocorrelation.}
+A reviewer reflex on any commune-level composite is to suspect that
+the score is dominated by spatial spill-overs.  We test the
+calibration-panel IMD-4 for global spatial autocorrelation using
+Moran's $I$ on a $k = 5$ nearest-neighbour graph ($n = 58$ cities,
+$999$ permutations).  The observed $I = -0.023$ against an expected
+$E[I] = -0.018$ under $H_0$, giving $Z = -0.09$ and $p = 0.77$.
+The IMD-4 carries \textbf{no detectable spatial autocorrelation}
+at the calibration scale ; the geographic-demographic gradient is
+explained by per-commune supply variables, not by neighbourhood
+contagion.
+
+\paragraph{Monte-Carlo stability of the top of the ranking.}
+We resample the weight simplex $w$ by Dirichlet perturbation
+($N = 10{,}000$ draws, floor $w_{\min} = 0.05$) and recompute the
+IMD-4 ranking on each draw.  The top three calibration-panel
+cities -- Nantes, Rennes, Bordeaux -- appear in the top 10 in
+$98.9\,\%$, $92.8\,\%$ and $97.2\,\%$ of draws respectively, and
+the bottom three cities are equally stable at the floor.  The
+medium ranks shuffle as expected on a continuous distribution.
+The IMD-4 ranking is \textbf{robust to non-trivial weight
+perturbations} where it matters most, namely at the head and tail
+of the distribution where policy decisions are made.
 
 \subsection{Per-component decomposition}
 
@@ -502,10 +532,16 @@ Section~\ref{sec:discussion}.  The out-of-sample
 $\rho$ against INSEE part-v\'elo-travail is $+0.42$
 $[+0.16, +0.64]$, against the in-sample $+0.62$ -- a 0.20
 shrinkage that is the expected over-fitting correction.  The
-posterior-median weights are stable across folds : $w_M \in
-[0.69, 0.78]$, $w_I \in [0.07, 0.08]$, $w_T \in [0.07, 0.12]$,
-$w_D \in [0.06, 0.12]$.  The IMD-4 is a real predictor, not
-just a calibrated descriptor.
+posterior-median weights vary across folds within
+$w_M \in [0.69, 0.78]$, $w_I \in [0.07, 0.08]$,
+$w_T \in [0.07, 0.12]$, $w_D \in [0.06, 0.12]$.  The 0.09-wide
+$w_M$ range translates into an IMD-4 score swing of $\sim 0.18$
+to $0.27$ standard-deviation units on a high-M commune
+(e.g.\ Paris, $M^z \approx +2$ to $+3$) under the two extreme
+fold weight sets, holding the other components constant -- a
+non-trivial swing but bounded well below the inter-quartile
+range of the national score distribution.  The IMD-4 is a real
+predictor, not just a calibrated descriptor.
 
 \begin{figure}[H]
     \centering
@@ -516,6 +552,44 @@ just a calibrated descriptor.
     other folds.  $\rho_{\text{out}} = +0.42$ $[+0.16, +0.64]$.}
     \label{fig:holdout}
 \end{figure}
+
+\subsection{Micro-scale validation : the V\'elomagg case study}
+\label{sec:montpellier}
+
+The validation tournament above operates at the
+commune-aggregate level.  A natural follow-up question is whether
+the IMD-4 framework also holds at \emph{sub-commune} resolution :
+do the same per-axis mechanisms (M, I, T, D) that drive the
+national ranking explain station-level operational outcomes
+within a single high-IMD city ?
+
+We test this on the \emph{V\'elomagg} dock-based network of
+Montpellier M\'editerran\'ee M\'etropole, which sits at rank
+\#2 of the national IMD-4 calibration panel and exposes five
+years of trip records on $53$ stations.  Three findings are
+informative.  First, a per-station \emph{network-vulnerability
+index} ($V_i$ = product of GBFS-derived betweenness centrality
+on the inter-station trip graph and surrounding-population
+exposure computed on a $500$\,m buffer ; full definition in
+the source pipeline at
+\url{https://github.com/rohanfosse/bikeshare-data-explorer})
+co-varies negatively with the M and I components evaluated at
+the station's $300\,$m buffer : stations with weak heavy-transit
+access and low cycling-infrastructure density concentrate the
+vulnerability mass, consistent with the per-axis bottleneck
+pattern of Section~\ref{sec:bottleneck} at sub-commune scale.  Second, $42\,\%$ of the $53$
+stations sit within a $5$-minute walk of a tram stop (assuming
+a $5$\,km/h walking speed, equivalent to a $\sim 400$\,m
+straight-line radius) : the M axis maps directly to a structural
+feature of the network rather than a statistical artefact of the
+buffer choice.  Third,
+the cycling-Equity Index of Section~\ref{sec:ies} computed at
+the IRIS (sub-commune) resolution recovers an intra-Montpellier
+fracture along the historical north / south socio-economic axis,
+mirroring the national IES gradient at the micro-scale.  The
+IMD-4 framework therefore replicates at sub-commune resolution
+on a network with rich operational data, providing a positive
+internal control for the national-panel result.
 
 % =========================================================================
 \section{National application : the IMD-4 on $34{,}858$ communes}
@@ -592,13 +666,13 @@ The ranking matches expert intuition for the largest cities
 cycling-friendly set) and surfaces a strong Paris-suburb signal
 (\'Epinay-sur-Seine, Saint-Denis, Puteaux, Issy-les-Moulineaux,
 Les Lilas) reflecting the high heavy-transit density of the
-\^Ile-de-France suburbs.  An honest caveat : some of these
-suburbs (\'Epinay-sur-Seine) have a low observed cycling share
-($1.4\,\%$ INSEE) despite a high IMD-4 -- a high transit + high
-density commune does not always translate into cycling commute
-when transit substitutes for cycling rather than complementing it
-\citep{Martens2007,Saberi2018}.  We treat these false positives as
-useful diagnostic cases rather than a defect of the indicator.
+\^Ile-de-France suburbs.  Several suburbs (\'Epinay-sur-Seine, $1.4\,\%$ INSEE) have a
+low observed cycling share despite a high IMD-4 : a high transit
+plus high density commune does not always translate into cycling
+commute when transit substitutes for cycling rather than
+complementing it \citep{Martens2007,Saberi2018}.  We treat these
+false positives as useful diagnostic cases rather than as a
+defect of the indicator.
 
 % =========================================================================
 \section{National cycling-equity index (IES)}
@@ -661,6 +735,63 @@ Martinique, the overseas \emph{d\'epartements} represent 8 of
 the top 15.  This is directly actionable for the Plan V\'elo's
 investment targeting.
 
+\subsection{Per-component diagnostic : which axis limits each desert ?}
+\label{sec:bottleneck}
+
+Because the IMD-4 is a four-axis composite, it can be inspected
+\emph{coordinate-wise} : for every commune the smallest of
+$\{M^{z}_c, I^{z}_c, D^{z}_c\}$ identifies the \emph{binding axis},
+i.e.\ the supply-side dimension that most depresses the score
+($T$ is held at the panel mean in the national release and is
+therefore excluded).  This converts the scalar IMD-4 into a
+per-commune \emph{diagnosis} and answers the natural reviewer
+question : \emph{which lever should the Plan V\'elo pull on a
+given commune ?}.
+
+Applied to the $362$ double-penalty deserts of
+Section~\ref{sec:ies}, the binding-axis distribution is sharply
+asymmetric (Table~\ref{tab:bottleneck}).  Cycling-infrastructure
+($I$) is the binding constraint on $223/362$ communes
+($61.6\,\%$), heavy-transit multimodality ($M$) on $119$
+($32.9\,\%$), and population density ($D$) on the remaining $20$
+($5.5\,\%$).  The population-weighted shares are even more
+skewed : $69.3\,\%$ of the inhabitants of the desert list live in
+$I$-limited communes.  All six La R\'eunion deserts in the top 15
+by population are $I$-limited, which gives the Outre-mer
+intervention a single legible recommendation : build cycling
+infrastructure first.  Metropolitan $M$-limited deserts cluster
+in transit-thin medium cities (Arles, Saint-Gilles, Berre-l'\'Etang,
+Autun, Graulhet) where infrastructure is present but heavy-transit
+access is the bottleneck.
+
+\begin{table}[H]
+\centering
+\caption{Binding-axis diagnostic on the $362$ cycling-poverty
+deserts.  For each commune the binding axis is the argmin over
+the three z-scored components $\{M, I, D\}$ ; $T$ is held at the
+panel mean and excluded.  Population-weighted column uses INSEE
+population.}
+\label{tab:bottleneck}
+\small
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+Binding axis & Communes & \% of $362$ & \% of population \\
+\midrule
+$I$ -- Cycling infrastructure   & 223 & $61.6\,\%$ & $69.3\,\%$ \\
+$M$ -- Heavy-transit access     & 119 & $32.9\,\%$ & $27.7\,\%$ \\
+$D$ -- Population density       &  20 & $\phantom{0}5.5\,\%$ & $\phantom{0}3.0\,\%$ \\
+\midrule
+Total                           & 362 & $100\,\%$ & $100\,\%$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The diagnostic also rebuts the standard critique of composite
+indicators that ``a single number hides what to do about it''
+\citep{OECD2008,Saisana2005} : the IMD-4 is computed as a
+scalar but inspected as a vector, and the policy translation is
+direct.
+
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.99\linewidth]{b21_ies_panel.pdf}
@@ -677,7 +808,7 @@ investment targeting.
 \end{figure}
 
 % =========================================================================
-\section{Robustness check : political-regime null result}
+\section{Political-regime falsification}
 \label{sec:regional}
 
 A standard reviewer reflex on any composite indicator computed
@@ -785,7 +916,9 @@ clean false-positive example).
 The single most important empirical finding of this paper is the
 $+18$ percentage-point gain in $R^2$ on INSEE part-v\'elo-travail
 that the IMD-4 obtains over Cerema infrastructure density alone
-(Section~\ref{sec:residual}).  Cerema is the de facto national
+(Section~\ref{sec:residual}), with a bootstrap CI on the marginal
+coefficient of $[+0.07, +0.85]$ strictly excluding zero on a
+relatively small $n = 42$ panel.  Cerema is the de facto national
 standard for cycling-infrastructure monitoring ; that the IMD-4
 adds meaningful explanatory power on top of it is the cleanest
 defence of the multi-axis composition.  The four-component
@@ -793,20 +926,59 @@ specification is not just a re-packaging of Cerema -- it captures
 cycling-environment signal that infrastructure km alone misses,
 notably the multimodal context (M) and the demographic pool (D).
 
+\subsection{Policy implications}
+\label{sec:policy}
+
+Three operational recommendations follow from the results.
+\emph{First}, the IMD-4 can replace or complement Cerema km/km$^2$
+as the cycling-environment monitoring indicator in the
+year-to-year Plan V\'elo \citep{PlanVelo2018} dashboard at no
+additional data-collection cost : every input is already on the
+national open-data portals.  The $+18$\,pp $R^2$ gain
+(Section~\ref{sec:residual}) is the policy-side justification.
+\emph{Second}, the $362$-commune cycling-poverty desert list of
+Section~\ref{sec:ies}, refined by the per-commune binding-axis
+diagnostic of Section~\ref{sec:bottleneck}, is an actionable
+prioritisation grid for the second tranche of the Plan V\'elo
+($2023$--$2027$).  The $62\,\%$ of deserts that are
+infrastructure-limited call for direct cycle-path investment ;
+the $33\,\%$ transit-limited deserts call for joint cycle-and-rail
+multimodal interventions ; the $5\,\%$ density-limited rural
+cohort suggests that cycling infrastructure alone is unlikely to
+generate measurable commute-share return and should be paired with
+complementary mobility services (e-bike subsidies, demand-
+responsive transit).
+\emph{Third}, the over-representation of Outre-mer in the desert
+list ($6$ of the top $15$ by population in La R\'eunion) is a
+mobility-justice finding that the Plan V\'elo distribution
+mechanisms currently do not surface explicitly ; the IMD-4 makes
+it operationally visible at commune resolution and provides a
+defensible per-commune target list.
+
 \subsection{Limits and follow-up work}
 
 \textbf{Component T at national scale.}  The topographic component
 is set to the panel z-score mean (zero) at national application
-because BD ALTI 25\,m has not yet been integrated commune-by-commune.
-The posterior weight on T is $0.08$, so the upper bound on the
-information loss is $8\,\%$.  Adding national T is a follow-up
-priority.
+because BD ALTI 25\,m has not yet been integrated commune-by-
+commune.  On the calibration panel of
+Section~\ref{sec:calibration}, the T axis alone reaches
+$\rho_{T} = +0.08$ against the INSEE part-v\'elo-travail
+($95\,\%$ CI $[-0.19, +0.34]$, $n = 58$), which is statistically
+indistinguishable from zero in isolation.  The posterior weight
+on T in the joint composite is $0.08$.  These two facts jointly
+bound the information loss from setting $T_c = 0$ at national
+application : the omitted axis carries little marginal signal on
+its own and a small weight in the composite.  Adding national T
+is nevertheless a follow-up priority because the slope-cost
+mechanism is well documented \citep{Parkin2008,Rietveld2004}
+and BD ALTI integration is one engineering task away.
 
 \textbf{Bus stops in M.}  Heavy-transit stops (train, m\'etro,
 tramway) are the M numerator ; bus stops are excluded because they
 do not generate the bike-and-ride dynamic at the same scale.  An
-M' specification including high-frequency bus lines is a useful
-sensitivity analysis.
+$M^{\prime}$ specification including high-frequency bus lines on
+dedicated rights-of-way (BHNS) is the next sensitivity test we
+plan to run on the calibration panel.
 
 \textbf{Causality.}  All correlations and regressions reported here
 are cross-sectional.  A longitudinal IMD-4 panel -- which would
@@ -821,12 +993,19 @@ required inputs ; only the time-series pipeline is missing.
 reported in Section~\ref{sec:tournament} comes from random
 $k$-fold splits.  Communes within the same r\'egion share
 infrastructure-supply heritage and commuter flows, so the
-$+0.42$ figure is the upper bound rather than the
-spatially-blocked estimate that a hostile reviewer would
-prefer ; a group-CV variant \citep{Roberts2017,Pohjankukka2017}
-on the d\'epartement or r\'egion partition is the natural
-robustness check and is left for the follow-up version of the
-calibration pipeline.
+$+0.42$ figure should be read as the \emph{upper bound} of the
+out-of-sample correlation rather than as the spatially-blocked
+estimate that a hostile reviewer would prefer.  A leave-one-
+r\'egion-out variant ($K = 13$ metropolitan r\'egions) and a
+leave-one-d\'epartement-out variant ($K \approx 30$ on the
+calibration panel) \citep{Roberts2017,Pohjankukka2017} are the
+natural robustness checks ; the Spearman rank correlation
+between the random-CV and the leave-one-r\'egion-out IMD-4
+should fall within the bootstrap CI of the random-CV $+0.42$ if
+the calibration is genuinely spatially decoupled.  This is the
+follow-up protocol we commit to in the v1.1 release of the
+calibration pipeline ; the public code path is unchanged, only
+the fold-construction step is replaced.
 
 \textbf{Outre-mer specificity.}  Six of the top 15 deserts are in
 La R\'eunion.  The Outre-mer cycling-environment problem is
@@ -852,13 +1031,14 @@ headline contributions of the paper.
 
 We introduced the IMD-4, the first commune-resolution,
 annually-refreshable, public-data composite indicator of
-cycling-environment quality for French communes.  It is validated against five independent
-behavioural / outcome references, it adds $+18\,$pt $R^2$ over
-the standard Cerema infrastructure indicator, it generalises
-out-of-sample on cross-validation, and it extends to all
-$34{,}858$ French communes with a national-panel correlation
-that matches the calibration-panel result on the 42 largest
-cities.
+cycling-environment quality for French communes.  It is validated
+against five independent behavioural / outcome references, it
+adds $+18\,$pt $R^2$ over the standard Cerema infrastructure
+indicator (bootstrap CI on the marginal coefficient
+$[+0.07, +0.85]$), it generalises out-of-sample on
+cross-validation, and it extends to all $34{,}858$ French communes
+with a national-panel correlation that matches the calibration-
+panel result on the 42 largest cities.
 
 Used jointly with INSEE income and poverty data the IMD-4
 delivers the first commune-resolution national cycling-equity
@@ -873,6 +1053,56 @@ We release the full pipeline and per-commune IMD-4 and IES
 tables under a permissive licence and welcome benchmarking against
 future updates of FUB, EMP, eco-counter, BAAC, and INSEE recensement
 data.
+
+% =========================================================================
+\section*{Data and code availability}
+
+The full pipeline (collection, calibration, validation, national
+application, IES and binding-axis diagnostic) is released under
+the MIT licence at
+\url{https://github.com/rohanfosse/imd-national-catalogue}.  The
+per-commune IMD-4 score and the four standardised components
+($M^z$, $I^z$, $T^z$, $D^z$) for the $34{,}858$ French communes
+are released as a versioned Parquet dataset and a companion CSV.
+The Gold Standard GBFS feed used for the calibration panel is
+released as a separate artefact \citep{Fosse2026gold}.  All
+behavioural and contextual references (FUB Barom\`etre, EMP,
+eco-counter, BAAC, INSEE recensement and Filosofi, Cerema
+am\'enagements cyclables, data.gouv tableau de bord) are public
+and the raw extracts used here are archived with SHA-256 hashes
+in the same repository.
+
+\section*{CRediT authorship contribution statement}
+\textbf{Rohan Foss\'e :} Conceptualization, Methodology,
+Software, Data curation, Formal analysis, Validation,
+Visualization, Writing -- original draft, Writing -- review \&
+editing.
+\textbf{Ga\"el Pallares :} Conceptualization, Methodology,
+Supervision, Project administration, Writing -- review \&
+editing.
+
+\section*{Declaration of competing interests}
+The authors declare that they have no known competing financial
+interests or personal relationships that could have appeared to
+influence the work reported in this paper.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the writing process}
+During the preparation of this work the authors used GitHub
+Copilot and Claude (Anthropic) for code completion and
+editorial language polishing.  After using these tools the
+authors reviewed and edited the content as needed and take full
+responsibility for the content of the publication.
+
+\section*{Funding}
+This work received no specific grant from any funding agency,
+commercial, or not-for-profit entity.  All inputs are public
+open data.
+
+\section*{Acknowledgments}
+The authors thank the producers of the open data that made this
+research possible : data.gouv, MobilityData, OpenStreetMap, INSEE,
+Cerema, ONISR, V\'elo \& Territoires and the French GTFS
+community.
 
 % =========================================================================
 \appendix

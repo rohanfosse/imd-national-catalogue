@@ -25,6 +25,20 @@ paper/*.synctex.gz
 paper/*.toc
 paper/*.fdb_latexmk
 paper/*.fls
+paper_social/*.aux
+paper_social/*.log
+paper_social/*.out
+paper_social/*.bbl
+paper_social/*.blg
+paper_social/*.bcf
+paper_social/*.run.xml
+paper_social/*.synctex.gz
+paper_social/*.toc
+paper_social/*.fdb_latexmk
+paper_social/*.fls
+
+# Root-level LaTeX orphan log
+texput.log
 
 # Jupyter
 .ipynb_checkpoints/
