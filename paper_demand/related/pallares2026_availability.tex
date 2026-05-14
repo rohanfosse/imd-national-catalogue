@@ -1,0 +1,117 @@
+% ========================================================================
+% In-house reference paper. Kept in this repo as the baseline against
+% which the IMD-augmented extension is benchmarked.
+%
+%   Authors : G. Pallares, M. Foucras, R. Fossé, I. Pabois (CESI LINEACT)
+%   Venue   : SCITEPRESS conference format (draft 2026-05)
+%   Task    : 15-min station-level bike availability forecast
+%   Data    : 15 French cities, 1-min station_status, Sep-Nov 2024
+%             primary case study: "Place Saint-Pierre, Toulouse"
+%   Features: AB (available bikes), MM (min since midnight),
+%             WD (weekday), RH (rel. humidity), T (temperature)
+%   Models  : LSTM, MLP, ARIMA(2,0,2), XGBoost (200 trees, depth 6)
+%   Best    : LSTM, MAE = 1.85 (~8.5% of 22-slot capacity) at 15 min,
+%             AB+MM+WD only, 2-month training, 1-month test
+%   Key finding: weather degrades performance ; recent usage dominates
+%
+% Extension plan (paper_demand/related/IMPROVEMENT_PLAN.md) :
+%   1. Add IMD-4 station features (M, I, T, D + 9 socio-econ)
+%   2. Add Transformer / TFT / Chronos baselines
+%   3. Extend from 1 station to all 15 cities × all stations
+%   4. Add cross-city transfer test
+%   5. Add bootstrap CIs on MAE / RMSE
+%   6. Re-validate the "weather doesn't help" claim with rainfall data
+% ========================================================================
+
+\documentclass[a4paper,twoside]{article}
+\usepackage{epsfig}
+\usepackage{subcaption}
+\usepackage{calc}
+\usepackage{amssymb,amstext,amsmath,amsthm}
+\usepackage{multicol}
+\usepackage{pslatex}
+\usepackage{booktabs}
+\usepackage{algorithm2e}
+\usepackage[bottom]{footmisc}
+\usepackage{url}
+\usepackage{xcolor}
+\usepackage{comment}
+% \usepackage{SCITEPRESS}  % requires venue-side .sty
+
+\newcommand{\ie}{\emph{i.e.}}
+\newcommand{\eg}{\emph{e.g.}}
+\newcommand{\etc}{etc{.\@}}
+
+\begin{document}
+\title{Forecasting Short-Term Availability of Bikes at Sharing Stations:
+A Deep-Learning Approach}
+
+\author{Ga\"el Pallares, Myriam Foucras, Rohan Foss\'e, Ilan Pabois\\
+CESI LINEACT, France}
+
+\date{2026}
+\maketitle
+
+\begin{abstract}
+The growing popularity of bike-sharing systems represents a significant
+urban mobility trend. In this paper, the short-term bike availability
+forecasting at the station level is addressed using real-time open data
+from public bike station feeds across many French cities. We show that
+deep learning methods (LSTM, MLP) achieve a mean forecasting error
+lower than 10\,\% relative to station capacity even for limited training
+data volumes and number of features. Results are computed in reduced
+time, opening the way for intelligent fleet management.
+\end{abstract}
+
+\paragraph{Data.} 15 French cities, station\_status at 1-min resolution,
+plus hourly weather (T, RH) and hourly air-pollution (NO$_2$, O$_3$,
+PM10, PM2.5, SO$_2$, NO$_x$, C$_6$H$_6$, CO, NO). The principal case
+study is the station ``Place Saint-Pierre'' in Toulouse, 22-slot
+capacity.
+
+\paragraph{Features (5).}
+AB = available bikes ;
+MM = minutes since midnight ;
+WD = weekday ;
+RH = relative humidity ;
+T = temperature.
+
+\paragraph{Models.}
+Two-layer MLP (100/100, ReLU). Two-layer LSTM (100/100 memory units,
+dropout 0.2). Both: Adam, lr=1e-3, MSE loss, batch 32, $\sim 300$
+epochs with early stopping. Plus ARIMA$(2,0,2)$ rolling forecast and
+XGBoost (200 trees, depth 6, lr 0.1).
+
+\paragraph{Best result.}
+Place Saint-Pierre, LSTM, AB+MM+WD only, 2-month training,
+1-month test : MAE = 1.85 bikes ($\approx 8.5\,\%$ of capacity) at
+15-min horizon ; MAE = 2.65 at 60-min horizon. Adding T or RH
+\emph{degrades} performance. ARIMA and XGBoost converge to similar
+MAE on long training windows ; XGBoost drops markedly below 15-day
+training.
+
+\paragraph{Key findings.}
+\begin{itemize}
+\item Recent autoregressive state dominates : AB+MM+WD is enough.
+\item Slow exogenous covariates (T, RH) are redundant at $<1$\,h horizon.
+\item Training beyond 1 month does not improve MAE (concept drift).
+\item LSTM beats MLP at long training ; MLP is competitive at short
+training and is faster.
+\item The model predicts \emph{observed} availability, not unmet
+demand : empty/full stations censor true user need.
+\end{itemize}
+
+\paragraph{Open extensions identified in the discussion.}
+\begin{itemize}
+\item Add precipitation and wind to revisit the weather claim.
+\item Add SHAP / attention for interpretability.
+\item Generalise across all 15 cities (currently single-station focus).
+\item Compare against modern spatio-temporal architectures.
+\end{itemize}
+
+% End of summary. The full original draft is the working copy held by
+% G. Pallares (gpallares@cesi.fr) ; this archival summary is the
+% baseline reference for the IMD-augmented extension scoped in
+% IMPROVEMENT_PLAN.md.
+
+\end{document}
