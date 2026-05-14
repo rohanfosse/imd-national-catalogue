@@ -71,3 +71,6 @@ paper_demand/experiments/__pycache__/
 
 # Tier 1 trip logs (large external downloads, gigabytes)
 paper_demand/data_collection/tier1_trip_logs/
+
+# OSM cache (regenerable via Overpass)
+paper_demand/data_collection/_cache_osm/

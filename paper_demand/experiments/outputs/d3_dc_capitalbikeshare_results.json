@@ -1,0 +1,28 @@
+{
+  "city": "dc_capitalbikeshare",
+  "n_total": 3695205,
+  "n_stations": 776,
+  "n_train": 2956164,
+  "n_test": 739041,
+  "no_imd": {
+    "model": "dc_capitalbikeshare_G_minus_temporal",
+    "n_test": 739041,
+    "r2_log": 0.0992804988096675,
+    "r2_trips": 0.05122262295891589,
+    "mae_trips": 1.5638613942400177,
+    "rmse_trips": 2.5385408152450504,
+    "fit_seconds": 18.5
+  },
+  "imd_augmented": {
+    "model": "dc_capitalbikeshare_G_plus_imd",
+    "n_test": 739041,
+    "r2_log": 0.46248839157371924,
+    "r2_trips": 0.4531484901341054,
+    "mae_trips": 1.2029134222747095,
+    "rmse_trips": 1.927243980646522,
+    "fit_seconds": 34.8
+  },
+  "delta_r2_trips": 0.4019258671751895,
+  "delta_mae_trips": 0.36094797196530815,
+  "wall_time_s": 111.7
+}
