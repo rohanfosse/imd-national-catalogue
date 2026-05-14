@@ -62,9 +62,9 @@ for French communes:\\
 % =========================================================================
 \begin{abstract}
 \noindent
-We introduce the \textbf{IMD-4} (\emph{Indice de Mobilit\'e Douce}), a
-real-time composite indicator of cycling-environment quality computable
-on every French commune from public data alone.  The IMD-4 combines
+We introduce the \textbf{IMD-4} (\emph{Indice de Mobilit\'e Douce}),
+an annually-refreshable composite indicator of cycling-environment
+quality computable on every French commune from public data alone.  The IMD-4 combines
 four supply-side axes -- transit multimodality (M), cycling infrastructure
 density (I), topography (T), and population density (D) -- under a
 Bayesian simplex prior that yields a posterior distribution on the
@@ -112,7 +112,7 @@ geographic-demographic gradient, not a partisan one.
 
 \noindent\textbf{Headline contributions.}
 (i) First commune-resolution composite cycling-environment indicator
-computable in real time on every French commune from public data ;
+computable annually on every French commune from public data alone ;
 (ii) a $+18\,$pt $R^2$ improvement over the Cerema baseline in
 predicting commune-level cycling commute share ; (iii) the first
 national cycling-equity diagnostic at commune resolution, with an
@@ -120,48 +120,52 @@ actionable list of $362$ priority communes for the Plan V\'elo.
 
 \noindent\textbf{Keywords:}
 cycling environment ; composite indicator ; commune-level monitoring ;
-real-time mobility ; equity index ; Bayesian inference ; French Plan
-V\'elo.
+mobility equity ; Bayesian inference ; French Plan V\'elo.
 \end{abstract}
 
 % =========================================================================
 \section{Introduction}
 \label{sec:intro}
 
-France's national cycling policy (\emph{Plan V\'elo}) has tripled
-investment in cycling infrastructure since 2018, but its monitoring
-relies on three quasi-orthogonal sources, none of which is real time
+France's national cycling policy (Plan V\'elo)
+\citep{PlanVelo2018} has tripled investment in cycling
+infrastructure since 2018, but its monitoring relies on three
+quasi-orthogonal sources, none of which is annually-updated
 \emph{and} commune-resolution \emph{and} comprehensive :
 \textbf{(i)} the FUB \emph{Barom\`etre V\'elo}, a self-administered
 perception survey of about 32 to 110 cities published every two
-years ;
+years \citep{FUB2023} ;
 \textbf{(ii)} the INSEE \emph{Enqu\^ete sur la Mobilit\'e des
 Personnes} (EMP, last 2019), a behavioural survey of $\sim 13{,}000$
-households at the urban-unit resolution ;
+households at the urban-unit resolution \citep{EMP2019} ;
 \textbf{(iii)} the INSEE recensement variable \emph{part-v\'elo-travail},
 exhaustive at the commune level but updated every five years with a
-three-year publication lag.  None of these sources is sufficient for
+three-year publication lag \citep{INSEEMobPro2022}.  None of these sources is sufficient for
 the year-to-year monitoring required to evaluate Plan V\'elo
 sub-actions, and none aligns with the commune granularity at which
 local cycling policy is actually decided.
 
 Existing \emph{supply-side} indicators -- the Cerema cycling-infrastructure
-density (km of cycle paths per km$^2$), the V\'elo \& Territoires annual
-``Indicateurs Territoires V\'elo'' aggregate -- partly fill this gap,
+density (km of cycle paths per km$^2$) \citep{Cerema2021Velo}, the
+V\'elo \& Territoires annual ``Indicateurs Territoires V\'elo''
+aggregate \citep{VeloTerritoires2023} -- partly fill this gap,
 but they reduce the cycling environment to a single axis (mostly
 infrastructure km) and are city-level rather than commune-level.  No
 single-number indicator currently combines transit multimodality,
 infrastructure continuity, topographic friction, and population
-density at commune resolution with an explicit uncertainty model.
+density at commune resolution with an explicit uncertainty model
+of the kind recommended for composite indicators
+\citep{OECD2008,Saisana2005}.
 
 In this paper we propose the \textbf{IMD-4} (\emph{Indice de Mobilit\'e
 Douce \`a quatre composantes}), a Bayesian composite indicator that
 fills three gaps simultaneously :
 
 \begin{itemize}[label=$\bullet$,leftmargin=*]
-    \item \emph{Temporal} -- daily-refreshable from public GBFS, GTFS,
-          OSM and INSEE feeds, against the FUB / EMP / recensement
-          update cycles of 2 / 10 / 5 years.
+    \item \emph{Temporal} -- annually refreshable from public
+          data.gouv, GTFS, OSM and INSEE feeds (and daily at the
+          station scale where GBFS is available), against the FUB /
+          EMP / recensement update cycles of 2 / 10 / 5 years.
     \item \emph{Spatial} -- per-commune resolution on all $34{,}858$
           French communes, against the city or urban-unit scale of
           existing indicators.
@@ -190,10 +194,11 @@ We answer four questions :
           national territory of $34{,}858$ communes without loss of
           predictive validity ?
 
-    \item[\textbf{Q4}] Used jointly with commune-level income and
-          poverty, does the IMD-4 reveal an actionable spatial
-          structure of cycling \emph{inequity} -- communes that are
-          simultaneously poor and cycling-environment-deprived ?
+    \item[\textbf{Q4}] Once residualised on commune income via the
+          cycling-Equity Index (IES), does the IMD-4 reveal an
+          actionable spatial structure of cycling
+          \emph{inequity} -- communes that are simultaneously poor
+          and cycling-environment-deprived ?
 \end{enumerate}
 
 \noindent\textbf{Contributions.}
@@ -211,10 +216,9 @@ on $34{,}858$ communes (Section~\ref{sec:national}).
 \textbf{(C4)} A national cycling-Equity Index (IES) and its operational
 output : a ranked list of $362$ ``double-penalty'' communes that the
 Plan V\'elo could prioritise (Section~\ref{sec:ies}).
-\textbf{(C5)} A regional decomposition by current and previous
-political regime, showing that the geographic-demographic signal
-captured by the IMD-4 is not a partisan artefact
-(Section~\ref{sec:regional}).
+\textbf{(C5)} A falsification test by regional political regime
+showing that the geographic-demographic signal captured by the
+IMD-4 is not a partisan artefact (Section~\ref{sec:regional}).
 
 \noindent\textbf{Data and code.}  All inputs are public.  The full
 pipeline -- collection, calibration, validation, national application
@@ -236,28 +240,35 @@ quality :
           stops (train, m\'etro, tramway) per km$^2$.  Heavy-transit
           accessibility is the dominant factor in cycling-as-feeder
           modal choice ; bus stops are excluded because they do
-          not generate the bike-and-ride dynamic.
+          not generate the bike-and-ride dynamic
+          \citep{Martens2007,Saberi2018}.
           Source : data.gouv \emph{Nombre de stations TC pour
           $1{,}000$ habitants} (publisher : Tableau de bord des
           mobilit\'es durables), commune level, year 2025.
 
-    \item[\textbf{I -- Cycling infrastructure.}]  Total km of cycling
-          infrastructure (\emph{pistes cyclables}, \emph{bandes},
-          \emph{voies vertes}, \emph{voies bus partag\'ees},
-          \emph{double-sens}, \emph{am\'enagements mixtes}) per
-          km$^2$.  Source : data.gouv \emph{Lin\'eaire cyclable
-          pour $1{,}000$ habitants} (same publisher), commune level,
-          year 2025.
+    \item[\textbf{I -- Cycling infrastructure.}]  Total km of
+          dedicated cycling infrastructure per km$^2$ (all
+          \emph{am\'enagements cyclables} types : pistes, bandes,
+          voies vertes, voies bus partag\'ees, double-sens, mixtes).
+          Infrastructure density is the supply-side variable most
+          consistently associated with cycling commute share in the
+          international literature
+          \citep{Schoner2014,Parkin2008,Heinen2010}.
+          Source : data.gouv \emph{Lin\'eaire cyclable pour
+          $1{,}000$ habitants}, commune level, year 2025.
 
     \item[\textbf{T -- Topography.}]  Elevation roughness derived
-          from BD ALTI 25\,m.  Computed at station resolution on the
-          calibration panel ; set to the panel z-score mean (zero) at
-          national application, with documented impact.
+          from BD ALTI 25\,m.  Slope is a documented determinant of
+          cycling demand and modal share
+          \citep{Parkin2008,Rietveld2004}.
+          Computed at station resolution on the calibration
+          panel ; set to the panel z-score mean (zero) at national
+          application, with documented impact.
 
     \item[\textbf{D -- Density.}]  Log of commune population density,
           where density is INSEE population divided by commune
           surface in km$^2$.  Cycling-trip generation has a well-known
-          density gradient.
+          density gradient \citep{FaghihImani2014,Rietveld2004}.
 \end{description}
 
 For the calibration panel of Section~\ref{sec:calibration}, the four
@@ -277,9 +288,11 @@ score as
 \]
 with weights $(w_M, w_I, w_T, w_D)$ on the unit simplex
 $\Delta^{4} = \{ w \in \mathbb{R}_{+}^{4} : \mathbf{1}^{\top} w = 1 \}$.
-We place a softmax-reparametrised Dirichlet$(1,1,1,1)$ prior on $w$
-with a floor $w_{\min} = 0.05$ to forbid degenerate
-single-component fits.
+A simplex parameterisation is the standard construction for composite
+indicators built from heterogeneous axes
+\citep{OECD2008,Saisana2005}.  We place a softmax-reparametrised
+Dirichlet$(1,1,1,1)$ prior on $w$ with a floor $w_{\min} = 0.05$
+to forbid degenerate single-component fits.
 
 We calibrate $w$ by fitting two simultaneous regressions :
 \[
@@ -298,8 +311,8 @@ $(w_M, w_I, w_T, w_D) = (0.78, 0.07, 0.08, 0.06)$.
 \label{sec:calibration}
 
 We use the 59 French cities with active dock-based bike-sharing
-systems and a complete Gold Standard GBFS feed (Foss\'e
-\& Pallares 2026, in preparation), totalling $5{,}442$ stations.
+systems and a complete Gold Standard GBFS feed \citep{Fosse2026gold},
+totalling $5{,}442$ stations.
 The panel structurally over-samples urban France : every panel city
 has more than $5{,}000$ inhabitants and an Autorit\'e Organisatrice
 de la Mobilit\'e ; this is the operational scale at which the IMD-4
@@ -322,7 +335,8 @@ against five reference series :
     \item \emph{EMP 2019} part-v\'elo modal share -- household
           survey ($n=44$) ;
     \item \emph{Eco-counter} daily flow -- observed activity ($n=25$) ;
-    \item \emph{BAAC} cyclist-accident rate -- safety proxy ($n=44$) ;
+    \item \emph{BAAC} cyclist-accident rate -- safety proxy
+          \citep{Reynolds2009,Schepers2014} ($n=44$) ;
     \item \emph{INSEE part-v\'elo-travail 2022} -- exhaustive
           recensement at commune level ($n=58$).
 \end{itemize}
@@ -468,7 +482,9 @@ The IMD-4 most strongly anti-correlates with car commute
 cycling and public transit (the two transit-coupled modes) much
 more than with walking.  This is by design : the M component is
 heavy-transit density, so an IMD-4 / TC correlation higher than
-IMD-4 / v\'elo is structurally consistent rather than a defect.
+IMD-4 / v\'elo is structurally consistent with the documented
+bike--transit complementarity rather than a defect
+\citep{Heinen2010,Saberi2018,Martens2007}.
 The indicator captures \emph{cycling-environment quality in
 multimodal urban contexts}, not generic active mobility.
 
@@ -476,7 +492,12 @@ multimodal urban contexts}, not generic active mobility.
 
 We split the 59-city panel into 5 folds, recalibrate the
 component weights on four folds, and predict the IMD-4 on the
-held-out fold (Figure~\ref{fig:holdout}).  The out-of-sample
+held-out fold (Figure~\ref{fig:holdout}).  Random $k$-fold is the
+baseline choice ; spatially-grouped variants
+\citep{Roberts2017,Pohjankukka2017} would tighten the bound
+when the sampling units carry residual within-r\'egion
+autocorrelation, a refinement discussed in
+Section~\ref{sec:discussion}.  The out-of-sample
 $\rho$ against INSEE part-v\'elo-travail is $+0.42$
 $[+0.16, +0.64]$, against the in-sample $+0.62$ -- a 0.20
 shrinkage that is the expected over-fitting correction.  The
@@ -540,24 +561,31 @@ from the calibration-panel result of $+0.62$.
     \centering
     \includegraphics[width=0.99\linewidth]{b20_national_imd4_scatter.pdf}
     \caption{National application of the IMD-4 on $34{,}858$
-    French communes.  Left : Spearman $\rho$ against INSEE
-    part-v\'elo-travail 2022 stratified by minimum commune
-    population, with bootstrap $95\,\%$ CI bars.  The horizontal
-    red dashed line marks the calibration-panel result of $+0.62$
-    on 59 cities ; the national $\rho$ rises to $+0.55$ on the 42
-    largest cities, statistically indistinguishable from the
-    calibration result.  Right : the top 100 commune by IMD-4
-    among those with $>5{,}000$ inhabitants, with the top 15
-    labelled.}
+    French communes.  \textbf{Left :} Spearman $\rho$ between the
+    national IMD-4 and the INSEE part-v\'elo-travail 2022,
+    stratified by minimum commune population (six thresholds from
+    all communes to pop $\geq 100{,}000$), with $1{,}000$-resample
+    bootstrap $95\,\%$ CI bars.  The horizontal red dashed line
+    marks the calibration-panel benchmark $\rho = +0.62$ on $59$
+    cities ; the national $\rho$ rises monotonically with the
+    population floor and reaches $+0.55$ on the $42$ cities with
+    pop $\geq 100{,}000$, statistically indistinguishable from the
+    calibration result.  \textbf{Right :} top $100$ communes by
+    IMD-4 among those with pop $\geq 5{,}000$, plotted in the
+    (IMD-4, INSEE part-v\'elo-travail) plane ; the top $15$ are
+    labelled.  The clean false positives (\'Epinay-sur-Seine,
+    Saint-Denis (93)) and the cycling-flagship matches (Paris,
+    Grenoble, Lyon) are both visible.}
     \label{fig:national}
 \end{figure}
 
 \subsection{Top of the national ranking}
 
 The top 15 IMD-4 communes with population above $5{,}000$ are :
-Paris, \'Epinay-sur-Seine, Grenoble, Rouen, Saint-Denis, Puteaux,
-Le Petit-Quevilly, Lyon, Issy-les-Moulineaux, Le Bouscat,
-Levallois-Perret, Anzin, Les Lilas, Cenon, Saint-Priest-en-Jarez.
+Paris, \'Epinay-sur-Seine (93), Grenoble, Rouen,
+Saint-Denis (93), Puteaux, Le Petit-Quevilly, Lyon,
+Issy-les-Moulineaux, Le Bouscat, Levallois-Perret, Anzin, Les Lilas,
+Cenon, Saint-Priest-en-Jarez.
 The ranking matches expert intuition for the largest cities
 (Paris, Grenoble, Lyon, all in the canonical French
 cycling-friendly set) and surfaces a strong Paris-suburb signal
@@ -567,7 +595,8 @@ Les Lilas) reflecting the high heavy-transit density of the
 suburbs (\'Epinay-sur-Seine) have a low observed cycling share
 ($1.4\,\%$ INSEE) despite a high IMD-4 -- a high transit + high
 density commune does not always translate into cycling commute
-when transit replaces it.  We treat these false positives as
+when transit substitutes for cycling rather than complementing it
+\citep{Martens2007,Saberi2018}.  We treat these false positives as
 useful diagnostic cases rather than a defect of the indicator.
 
 % =========================================================================
@@ -603,7 +632,9 @@ the correlation collapses to $\rho = +0.001$ ($95\,\%$ CI
 $[-0.04, +0.04]$, Figure~\ref{fig:ies}c).  Within the urban
 context the IMD-4 is \textbf{orthogonal} to income -- a key
 result that rebuts the natural critique ``your indicator just
-proxies wealth''.
+proxies wealth'', a recurrent finding in the equity-of-access
+literature on bike-sharing and transit
+\citep{Smith2015,Hosford2018,ElGeneidy2016}.
 
 \subsection{Double-penalty deserts}
 
@@ -645,93 +676,80 @@ investment targeting.
 \end{figure}
 
 % =========================================================================
-\section{Regional decomposition by political regime}
+\section{Robustness check : political-regime null result}
 \label{sec:regional}
 
-A natural question is whether the regional political regime --
-specifically, the majority of the \emph{Conseil R\'egional} -- shapes
-the commune-level cycling environment.  France's $18$ regions
-underwent regional elections in 2015 (effective 2016-2021) and 2021
-(effective 2021-2028).  We label each region as \emph{droite}
+A standard reviewer reflex on any composite indicator computed
+across French communes is the suspicion that the score
+piggy-backs on the political colour of the host \emph{Conseil
+R\'egional}.  We therefore run the IMD-4 through a falsification
+probe : if the indicator captured a partisan signal, the regional
+decomposition would reveal it.
+
+We label each of the $18$ French regions as \emph{droite}
 (LR / centre / UDI), \emph{gauche} (PS / EELV / DVG /
-communist / independence), or \emph{r\'egionaliste} (Corse), and
-aggregate commune-level IMD-4 and IES by region and regime.
-
-The single 2015 / 2021 regime change in our panel is La R\'eunion,
-which flipped from droite (Robert) to gauche (Bello) in 2021.
-
-\subsection{Regional ranking}
-
-Table~\ref{tab:regional} ranks the 18 regions by their commune-mean
-IMD-4.  The ordering is dominated by structural geography :
-\^Ile-de-France stands alone at the top (mean $+0.98$, an order of
-magnitude above the second region) ; all metropolitan
-``rurban'' regions (Bourgogne-Franche-Comt\'e, Centre-Val de Loire,
-Occitanie, Nouvelle-Aquitaine) cluster near the bottom regardless of
-regime ; the overseas \emph{d\'epartements} occupy distinct positions
-(La R\'eunion mid-rank, Martinique / Guadeloupe / Guyane near bottom).
+communist / independence), or \emph{r\'egionaliste} (Corse), under
+the 2015 and 2021 \emph{Conseil R\'egional} majorities ; the only
+2015~$\to$~2021 regime flip in the panel is La R\'eunion (droite
+$\to$ gauche).  Table~\ref{tab:regional-summary} aggregates the
+commune-mean IMD-4 by regime, with and without \^Ile-de-France.
+The full 17-region breakdown is reported in
+Appendix~\ref{app:regional-full}.
 
 \begin{table}[H]
 \centering
-\caption{Region-by-region mean IMD-4 and IES with 2015 and 2021
-political regimes of the Conseil R\'egional.}
-\label{tab:regional}
+\caption{Commune-mean IMD-4 by 2021 regional political regime,
+aggregated with and without \^Ile-de-France.  The naive right-versus-
+left gap collapses once the structural over-representation of
+\^Ile-de-France in the right-led aggregate is removed.}
+\label{tab:regional-summary}
 \small
-\begin{tabular}{@{}lccccr@{}}
+\begin{tabular}{@{}lcccc@{}}
 \toprule
-Region & Regime 2015 & Regime 2021 & n communes & IMD-4 mean & IES mean \\
+Aggregate & $n_{\text{droite}}$ & $\overline{\IMD}_{\text{droite}}$
+          & $n_{\text{gauche}}$ & $\overline{\IMD}_{\text{gauche}}$\\
 \midrule
-\^Ile-de-France                & droite       & droite       &  1251 & $+0.98$ & $+1.08$ \\
-La R\'eunion                   & droite       & \textbf{gauche} & 24 & $+0.15$ & $+0.15$ \\
-Hauts-de-France                & droite       & droite       &  3504 & $+0.06$ & $+0.05$ \\
-Auvergne-Rh\^one-Alpes         & droite       & droite       &  3739 & $+0.03$ & $+0.01$ \\
-PACA                           & droite       & droite       &   837 & $+0.01$ & $-0.01$ \\
-Grand Est                      & droite       & droite       &  4217 & $+0.01$ & $-0.02$ \\
-Corse                          & r\'eg.       & r\'eg.       &   206 & $+0.01$ & $-0.02$ \\
-Bretagne                       & gauche       & gauche       &  1197 & $-0.01$ & $-0.03$ \\
-Pays de la Loire               & droite       & droite       &  1212 & $-0.02$ & $-0.05$ \\
-Normandie                      & droite       & droite       &  2511 & $-0.02$ & $-0.05$ \\
-Occitanie                      & gauche       & gauche       &  3636 & $-0.05$ & $-0.08$ \\
-Nouvelle-Aquitaine             & gauche       & gauche       &  4064 & $-0.06$ & $-0.10$ \\
-Centre-Val de Loire            & gauche       & gauche       &  1690 & $-0.07$ & $-0.10$ \\
-Guadeloupe                     & gauche       & gauche       &    32 & $-0.07$ & $+0.31$ \\
-Martinique                     & gauche       & gauche       &    34 & $-0.08$ & $-0.11$ \\
-Bourgogne-Franche-Comt\'e      & gauche       & gauche       &  3090 & $-0.08$ & $-0.12$ \\
-Guyane                         & gauche       & gauche       &    22 & $-0.23$ & $+0.13$ \\
+With \^Ile-de-France    & 17{,}271 & $+0.10$ & 13{,}789 & $-0.05$ \\
+Without \^Ile-de-France & 16{,}020 & $+0.03$ & 13{,}789 & $-0.05$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection{Right vs left aggregation and the \^Ile-de-France confound}
-
-Aggregating across regimes (Figure~\ref{fig:regional}) the commune-
-mean IMD-4 differs by $+0.15$ between right-led and left-led
-regions, statistically significant at $p < 10^{-200}$
-(Mann--Whitney $U$, $n_{\text{droite}} = 17{,}271$,
-$n_{\text{gauche}} = 13{,}789$).  But the effect collapses once
-\^Ile-de-France is removed : the right-led aggregate is then
-$+0.03$ and the difference drops to within sampling noise.  The
-2015 / 2021 contrast is essentially nil because only La R\'eunion
-flipped, and four years is too short to materialise a meaningful
-infrastructural shift.
+The full-aggregate $+0.15$ right-vs-left gap is statistically
+significant at $p < 10^{-200}$ (Mann--Whitney $U$, $n_{\text{droite}}
+= 17{,}271$, $n_{\text{gauche}} = 13{,}789$), but the effect is
+entirely carried by the structural over-representation of
+\^Ile-de-France in the right-led aggregate (mean IMD-4 $+0.98$, an
+order of magnitude above the second region).  Removing
+\^Ile-de-France collapses the residual gap to $+0.08$, within
+sampling noise.  The 2015~$\to$~2021 contrast is essentially nil
+because only La R\'eunion flipped, and four years is too short to
+materialise a meaningful infrastructural shift.
 
 The honest conclusion is that the IMD-4 \textbf{does not capture
 a political signal}.  Its variation across regions is driven by
 density, urbanisation, and transit-stock geography -- inputs that
-predate any current Conseil R\'egional.  This is a useful negative
-finding : it defends the IMD-4 against the natural critique that
-``you are just measuring how rich and right-wing a region is''.
+predate any current Conseil R\'egional.  The null result is the
+intended outcome of the falsification probe : it defends the IMD-4
+against the natural critique that ``you are just measuring how rich
+and right-wing a region is''.
 
 \begin{figure}[H]
     \centering
     \includegraphics[width=0.99\linewidth]{b22_regional_political.pdf}
-    \caption{Regional decomposition of the IMD-4 and IES by 2021
-    political regime of the Conseil R\'egional.  (a)~Regional mean
-    IMD-4 ; bar colour encodes the 2021 majority.  (b)~Regional
-    mean IES.  (c-d)~Commune-level distributions by regime,
-    boxplot (whiskers $1.5 \times$ IQR ; outliers hidden).  The
-    apparent right-left gap in (c) is dominated by the
-    \^Ile-de-France weight in the right aggregate.}
+    \caption{Falsification probe : regional decomposition of the
+    IMD-4 and IES by 2021 political regime of the
+    \emph{Conseil R\'egional}.  \textbf{(a)}~Per-region mean
+    IMD-4, bars coloured by 2021 majority (droite / gauche /
+    r\'egionaliste).  \textbf{(b)}~Per-region mean IES.
+    \textbf{(c)}~Commune-level IMD-4 distribution aggregated by
+    regime (boxplot ; whiskers $1.5\times$IQR ; outliers hidden) ;
+    the apparent right-vs-left gap is dominated by the
+    \^Ile-de-France weight in the right aggregate.
+    \textbf{(d)}~Same boxplot for the IES residual on log-income,
+    showing that once income is partialled out the inter-regime
+    gap closes further.  The visual takeaway is that the IMD-4 is
+    not a partisan proxy.}
     \label{fig:regional}
 \end{figure}
 
@@ -741,8 +759,8 @@ finding : it defends the IMD-4 against the natural critique that
 
 \subsection{What the IMD-4 is, and is not}
 
-The IMD-4 is a \textbf{real-time, commune-resolution, public-data
-composite indicator of cycling-environment quality}.  It is not a
+The IMD-4 is an \textbf{annually-refreshable, commune-resolution,
+public-data composite indicator of cycling-environment quality}.  It is not a
 measure of cycling \emph{behaviour} or \emph{perception} ; those
 are the domains of EMP / recensement and FUB respectively, and the
 IMD-4 is meant to complement them.  In particular, the IMD-4 is
@@ -793,22 +811,47 @@ sensitivity analysis.
 are cross-sectional.  A longitudinal IMD-4 panel -- which would
 require recomputing the four components year-by-year on the same
 communes -- would let us test whether an increase in cycling
-infrastructure causes a shift in commune cycling commute share.
-The data are public for all required inputs ; only the time-series
-pipeline is missing.
+infrastructure causes a shift in commune cycling commute share,
+naturally amenable to synthetic-control identification
+\citep{Abadie2010,Abadie2021}.  The data are public for all
+required inputs ; only the time-series pipeline is missing.
+
+\textbf{Spatial cross-validation.}  The out-of-sample $\rho$
+reported in Section~\ref{sec:tournament} comes from random
+$k$-fold splits.  Communes within the same r\'egion share
+infrastructure-supply heritage and commuter flows, so the
+$+0.42$ figure is the upper bound rather than the
+spatially-blocked estimate that a hostile reviewer would
+prefer ; a group-CV variant \citep{Roberts2017,Pohjankukka2017}
+on the d\'epartement or r\'egion partition is the natural
+robustness check and is left for the follow-up version of the
+calibration pipeline.
 
 \textbf{Outre-mer specificity.}  Six of the top 15 deserts are in
 La R\'eunion.  The Outre-mer cycling-environment problem is
 specific (tropical climate, mountainous terrain on R\'eunion
 itself, weak transit) and deserves a dedicated regional study.
 
+\subsection{On the political-regime null result}
+
+Section~\ref{sec:regional} reports a clean null result : the
+right-vs-left commune-mean IMD-4 gap collapses to noise once
+\^Ile-de-France is removed.  This is the expected outcome of a
+\emph{falsification probe} rather than a substantive finding ;
+its function is to defend the indicator against the
+predictable critique that any composite computed across
+heterogeneous French regions is a back-door measure of regional
+wealth and partisanship.  The null result is therefore reported
+as a robustness check and is intentionally absent from the
+headline contributions of the paper.
+
 % =========================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 
-We introduced the IMD-4, the first commune-resolution, real-time,
-public-data composite indicator of cycling-environment quality
-for French communes.  It is validated against five independent
+We introduced the IMD-4, the first commune-resolution,
+annually-refreshable, public-data composite indicator of
+cycling-environment quality for French communes.  It is validated against five independent
 behavioural / outcome references, it adds $+18\,$pt $R^2$ over
 the standard Cerema infrastructure indicator, it generalises
 out-of-sample on cross-validation, and it extends to all
@@ -846,6 +889,47 @@ city for the IMD-4 cells is most often Strasbourg, which is the
 top-ranked metropole on three of the five references ; this is
 the indicator's strength, not its fragility.
 
-\bibliography{references}
+\section{Full regional decomposition}
+\label{app:regional-full}
+
+Table~\ref{tab:regional} reports the per-region mean IMD-4 and IES
+for the 17 French regions, with the 2015 and 2021 \emph{Conseil
+R\'egional} majorities.  The body Section~\ref{sec:regional}
+aggregates these by political regime and shows that the apparent
+right-vs-left gap is entirely carried by \^Ile-de-France.
+
+\begin{table}[H]
+\centering
+\caption{Region-by-region mean IMD-4 and IES with 2015 and 2021
+political regimes of the Conseil R\'egional.  Ordered by IMD-4
+mean.}
+\label{tab:regional}
+\small
+\begin{tabular}{@{}lccccr@{}}
+\toprule
+Region & Regime 2015 & Regime 2021 & n communes & IMD-4 mean & IES mean \\
+\midrule
+\^Ile-de-France                & droite       & droite       &  1251 & $+0.98$ & $+1.08$ \\
+La R\'eunion                   & droite       & \textbf{gauche} & 24 & $+0.15$ & $+0.15$ \\
+Hauts-de-France                & droite       & droite       &  3504 & $+0.06$ & $+0.05$ \\
+Auvergne-Rh\^one-Alpes         & droite       & droite       &  3739 & $+0.03$ & $+0.01$ \\
+PACA                           & droite       & droite       &   837 & $+0.01$ & $-0.01$ \\
+Grand Est                      & droite       & droite       &  4217 & $+0.01$ & $-0.02$ \\
+Corse                          & r\'eg.       & r\'eg.       &   206 & $+0.01$ & $-0.02$ \\
+Bretagne                       & gauche       & gauche       &  1197 & $-0.01$ & $-0.03$ \\
+Pays de la Loire               & droite       & droite       &  1212 & $-0.02$ & $-0.05$ \\
+Normandie                      & droite       & droite       &  2511 & $-0.02$ & $-0.05$ \\
+Occitanie                      & gauche       & gauche       &  3636 & $-0.05$ & $-0.08$ \\
+Nouvelle-Aquitaine             & gauche       & gauche       &  4064 & $-0.06$ & $-0.10$ \\
+Centre-Val de Loire            & gauche       & gauche       &  1690 & $-0.07$ & $-0.10$ \\
+Guadeloupe                     & gauche       & gauche       &    32 & $-0.07$ & $+0.31$ \\
+Martinique                     & gauche       & gauche       &    34 & $-0.08$ & $-0.11$ \\
+Bourgogne-Franche-Comt\'e      & gauche       & gauche       &  3090 & $-0.08$ & $-0.12$ \\
+Guyane                         & gauche       & gauche       &    22 & $-0.23$ & $+0.13$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\bibliography{references_imd}
 
 \end{document}
