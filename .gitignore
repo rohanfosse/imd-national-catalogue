@@ -56,3 +56,15 @@ Thumbs.db
 
 # Local backups
 *.bak
+paper_demand/*.aux
+paper_demand/*.log
+paper_demand/*.out
+paper_demand/*.bbl
+paper_demand/*.blg
+paper_demand/*.bcf
+paper_demand/*.run.xml
+paper_demand/*.synctex.gz
+paper_demand/*.toc
+paper_demand/*.fdb_latexmk
+paper_demand/*.fls
+paper_demand/experiments/__pycache__/

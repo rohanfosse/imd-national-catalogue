@@ -1,0 +1,63 @@
+{
+  "experiment": "d2_full_benchmark",
+  "data": {
+    "n_total": 375305,
+    "n_stations": 53,
+    "n_train": 285411,
+    "n_test": 89894
+  },
+  "models": [
+    {
+      "model": "P_persistence_lag7d",
+      "n_test": 29676,
+      "r2_log": -0.608806240593579,
+      "r2_trips": -0.5313566630379583,
+      "mae_trips": 1.5035719099609113,
+      "rmse_trips": 2.642399523018912
+    },
+    {
+      "model": "AR_arima_111",
+      "n_test": 89894,
+      "r2_log": 0.07167551810507455,
+      "r2_trips": 0.05302538507343513,
+      "mae_trips": 1.018860560848539,
+      "rmse_trips": 1.739700572122264
+    },
+    {
+      "model": "L_ridge_full",
+      "n_test": 89894,
+      "r2_log": 0.12335491619349226,
+      "r2_trips": 0.11321833662507286,
+      "mae_trips": 0.987731667943221,
+      "rmse_trips": 1.6835022060685452,
+      "fit_seconds": 0.1
+    },
+    {
+      "model": "G_lgbm_full",
+      "n_test": 89894,
+      "r2_log": 0.22483263196334158,
+      "r2_trips": 0.3109247632049186,
+      "mae_trips": 0.9167231039586249,
+      "rmse_trips": 1.4840162591392922,
+      "fit_seconds": 9.6
+    },
+    {
+      "model": "G_lgbm_no_imd",
+      "n_test": 89894,
+      "r2_log": 0.08685884924238618,
+      "r2_trips": 0.04157681946821412,
+      "mae_trips": 0.9925312229725983,
+      "rmse_trips": 1.7501851402899105,
+      "fit_seconds": 8.3
+    },
+    {
+      "model": "N_lstm_full",
+      "n_test": 88622,
+      "r2_log": 0.10626572370529175,
+      "r2_trips": 0.11010634899139404,
+      "mae_trips": 0.9843339323997498,
+      "rmse_trips": 1.6885509044371776,
+      "fit_seconds": 86.2
+    }
+  ]
+}

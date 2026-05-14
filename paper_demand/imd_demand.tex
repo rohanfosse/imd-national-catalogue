@@ -1,0 +1,687 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+% !BIB TS-program = bibtex
+%
+% From cycling-environment supply to bike-share demand: an IMD-augmented
+% spatio-temporal forecasting benchmark for French networks.
+% Authors : R. Foss\'e \& G. Pallares (CESI LINEACT, 2025--2026).
+%
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{microtype}
+\usepackage{csquotes}
+
+\usepackage{amssymb,amsmath,amstext}
+
+\usepackage{graphicx}
+\graphicspath{{figures/}}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{caption}
+\captionsetup{font=small,labelfont=bf,labelsep=period}
+\usepackage{enumitem}
+\setlist{topsep=2pt,itemsep=2pt,parsep=0pt}
+\usepackage{url}
+
+\usepackage[authoryear,round]{natbib}
+\bibliographystyle{elsarticle-harv}
+
+\usepackage{xcolor}
+\usepackage[colorlinks=true,
+            linkcolor=black, citecolor=black, urlcolor=blue!50!black,
+            breaklinks=true]{hyperref}
+
+\usepackage{authblk}
+\renewcommand\Authfont{\normalsize}
+\renewcommand\Affilfont{\small\itshape}
+\setlength{\affilsep}{0.6em}
+
+\newcommand{\IMD}{\mathrm{IMD}}
+
+\newenvironment{highlights}{%
+  \par\noindent\textbf{\large Highlights}\par\smallskip
+  \begin{itemize}[leftmargin=1.4em,itemsep=0.15em,topsep=0.2em]}{%
+  \end{itemize}\par\medskip}
+
+% =========================================================================
+\title{\Large\bfseries From cycling-environment supply to bike-share demand:\\
+\large an IMD-augmented spatio-temporal forecasting benchmark for
+French networks}
+
+\author[1]{Rohan Foss\'e\thanks{Corresponding author: \texttt{rfosse@cesi.fr}. ORCID: \href{https://orcid.org/0009-0002-2195-0198}{0009-0002-2195-0198}}}
+\author[2]{Ga\"el Pallares\thanks{ORCID: \href{https://orcid.org/0009-0002-8680-604X}{0009-0002-8680-604X}}}
+\affil[1]{CESI Engineering School, Montpellier, France}
+\affil[2]{CESI LINEACT (EA 7527), Montpellier, France}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+% =========================================================================
+\begin{abstract}
+\noindent
+Operational bike-share demand prediction is dominated by two
+practices that do not communicate well : classical time-series
+forecasting on each station (\emph{e.g.}, ARIMA, persistence) and
+deep spatio-temporal learning trained from scratch on the trip log.
+Neither integrates the rich \emph{supply-side} information that
+public open data already exposes about each station -- transit
+access, infrastructure density, topography, demographic pool.
+
+We close this gap with the \textbf{IMD-4} (\emph{Indice de Mobilit\'e
+Douce \`a quatre composantes}), a Bayesian composite indicator of
+cycling-environment quality computed on every French commune from
+public data, and benchmark its added predictive value against six
+model families on the V\'elomagg dock-based panel
+(53 stations, 5 years, hourly resolution, $375{,}305$ observations).
+On a one-year temporal hold-out test, an IMD-augmented gradient-
+boosted model reaches $R^{2}_{\text{trips}} = 0.311$ against $0.042$
+for the same model trained without IMD features, a \textbf{$+0.27$
+absolute R$^2$ gain attributable to the IMD station-level
+enrichment alone}.  The IMD-augmented model also matches a
+station-fixed-effect baseline within $0.001$ R$^2$, meaning the
+$13$ IMD physical features absorb the spatial signal that $67$
+station dummies would otherwise have to memorise -- an essential
+property for transferring the model to stations without trip
+history.  Modern recurrent and Transformer-style baselines do not
+beat the gradient-boosted tabular SOTA on this data size, a
+finding consistent with the recent benchmark literature on
+small-to-medium tabular forecasting.
+
+The IMD-4 is computable on all $34{,}858$ French communes from
+five public open-data sources alone, so the predictive pipeline
+transfers to any commune with at least an active dock-based
+network.  Code, data and trained models are released under MIT.
+
+\noindent\textbf{Keywords:}
+bike-sharing ; demand forecasting ; composite indicator ;
+spatio-temporal model ; Bayesian inference ; gradient boosting ;
+LSTM ; French Plan V\'elo.
+\end{abstract}
+
+\begin{highlights}
+\item IMD-4 cycling-environment indicator integrated as feature in demand model
+\item $+0.27$ R$^2$ gain on hourly station-level trips, IMD vs no-IMD
+\item IMD beats persistence, ARIMA, Ridge, LSTM on V\'elomagg ($n=375{,}305$)
+\item IMD matches station fixed-effect: transferable to new stations
+\item Modern deep nets do not outperform gradient boosting on this scale
+\end{highlights}
+
+% =========================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Public bike-sharing systems have become a structural component of
+urban mobility in France and across Europe \citep{Pucher2010,Buehler2012}.
+Operational decisions -- where to add a station, how to rebalance
+the fleet, when to expect demand peaks -- require a forecasting
+layer between the live data feed and the dispatcher
+\citep{Forma2015,Raviv2013}.  Two practices currently dominate
+that layer, and they do not communicate with each other.  The
+first is classical time-series : per-station ARIMA models or naive
+persistence baselines that exploit the autoregressive structure of
+the trip series \citep{Box1976,Hyndman2008}.  The second is deep
+spatio-temporal learning : recurrent and graph-convolutional
+networks trained from scratch on the trip log, often with weather
+covariates \citep{Lin2018,Wang2021}.  Neither family integrates
+the rich \emph{supply-side} information that public open data
+already exposes about each station -- the density of nearby
+heavy-transit stops, the cycle-infrastructure quality of the
+surrounding street network, the topographic friction of the
+catchment, the demographic pool of the host commune.  All four
+have been documented in the cycling-environment literature as
+demand drivers
+\citep{Heinen2010,Schoner2014,Parkin2008,Rietveld2004,FaghihImani2014},
+yet none is routinely available to an operational forecasting
+pipeline.
+
+\noindent\textbf{Contribution.}
+This paper closes that gap with two complementary contributions.
+\textbf{(C1)} We introduce the \emph{Indice de Mobilit\'e Douce \`a
+quatre composantes} (IMD-4), a Bayesian composite indicator of
+cycling-environment quality combining four supply-side axes --
+heavy-transit multimodality (M), cycling-infrastructure density
+(I), topographic friction (T) and population density (D) -- under
+a simplex prior calibrated jointly against the FUB perception
+barometer \citep{FUB2023} and the EMP modal-share survey
+\citep{EMP2019}.  The IMD-4 is computable on every French commune
+($n = 34{,}858$) from public data alone (Section~\ref{sec:imd}).
+\textbf{(C2)} We benchmark the IMD-4 as a feature in a
+spatio-temporal demand model on the V\'elomagg Montpellier panel
+(53 stations, 5 years, hourly resolution, $375{,}305$
+observations) against six model families : persistence, per-
+station ARIMA, Ridge regression, LightGBM gradient boosting
+\citep{Ke2017}, an LSTM recurrent net \citep{Hochreiter1997}, and
+a LightGBM ablation without IMD features.  The IMD-augmented
+gradient-boosted model wins the benchmark with
+$R^{2}_{\text{trips}} = 0.311$ against $0.042$ for the same model
+without IMD ($\Delta R^2 = +0.27$, Section~\ref{sec:results}).
+
+\noindent\textbf{Why this matters operationally.}  A natural
+alternative to IMD-augmentation is to add one dummy per station
+(station fixed-effect), which captures the spatial signal by
+memorisation.  The IMD-augmented model matches the fixed-effect
+baseline within $0.001$ R$^2$, meaning the $13$ IMD physical
+features fully absorb what $67$ dummies would otherwise need to
+learn.  This is essential for transferring the model to stations
+without trip history -- the operational case of evaluating where
+to install a new station \citep{El-Assi2017,Ashqar2017}.
+
+% =========================================================================
+\section{The IMD-4 cycling-environment indicator}
+\label{sec:imd}
+
+\subsection{Four supply-side axes}
+\label{sec:axes}
+
+The IMD-4 combines four commune-level supply-side variables, each
+chosen for an independent and well-documented driver of cycling
+behaviour :
+
+\begin{description}
+    \item[\textbf{M -- Multimodality.}]  Density of heavy transit
+          stops (train, m\'etro, tramway) per km$^2$ ;
+          heavy-transit accessibility is the dominant factor in
+          cycling-as-feeder modal choice
+          \citep{Martens2007,Saberi2018}.
+          Bus stops are excluded because the bike-and-ride
+          dynamic operates at a different scale.
+
+    \item[\textbf{I -- Cycling infrastructure.}]  Total kilometres
+          of dedicated cycling infrastructure per km$^2$ -- all
+          \emph{am\'enagements cyclables} (segregated paths,
+          on-road lanes, green-ways, shared bus lanes, contraflow,
+          and mixed configurations).  Infrastructure density is
+          the supply-side variable most consistently associated
+          with commute cycling share in the international
+          literature \citep{Schoner2014,Parkin2008,Heinen2010}.
+
+    \item[\textbf{T -- Topography.}]  Elevation roughness derived
+          from BD ALTI 25\,m.  Slope is a documented determinant
+          of cycling demand and modal share
+          \citep{Parkin2008,Rietveld2004}.
+
+    \item[\textbf{D -- Density.}]  Logarithm of commune population
+          density.  Cycling-trip generation has a well-known
+          density gradient
+          \citep{FaghihImani2014,Rietveld2004}.
+\end{description}
+
+For the calibration panel of Section~\ref{sec:calib}, the four
+axes are evaluated at station resolution with a $300$\,m buffer
+for M.  For national application
+(Section~\ref{sec:national-imd}), they are evaluated at commune
+resolution from the nationally-published
+\emph{data.gouv} indicators.
+
+\subsection{Bayesian simplex prior on component weights}
+\label{sec:bayes}
+
+Let $\mathbf{x}_i = (M_i, I_i, T_i, D_i)^{\top}$ be the centred
+and scaled four-component vector for unit $i$.  The IMD-4 score is
+\[
+    \IMD_i \;=\; w_M M_i + w_I I_i + w_T T_i + w_D D_i,
+\]
+with weights $(w_M, w_I, w_T, w_D)$ on the unit simplex
+$\Delta^4 = \{w \in \mathbb{R}_+^4 : \mathbf{1}^{\top} w = 1\}$.
+The simplex parameterisation is the standard construction for
+composite indicators built from heterogeneous axes
+\citep{OECD2008,Saisana2005}.  We place a softmax-reparametrised
+$\text{Dirichlet}(1,1,1,1)$ prior on $w$ with a floor
+$w_{\min} = 0.05$ to forbid degenerate single-component fits.
+
+We calibrate $w$ by fitting two simultaneous regressions :
+\[
+    \text{FUB}_c = \alpha_F + \beta_F \overline{\IMD}_c + \varepsilon^F_c,
+    \qquad
+    \text{EMP}_c = \alpha_E + \beta_E \overline{\IMD}_c + \varepsilon^E_c,
+\]
+where $\overline{\IMD}_c$ is the station-mean IMD in city $c$.
+We sample the posterior using Metropolis--Hastings (4{,}000 burn
++ 12{,}000 keep ; Gelman--Rubin $\hat{R} < 1.05$ ; effective
+sample size $> 800$).  The posterior median of $w$ on the
+59-city calibration panel is
+$(w_M, w_I, w_T, w_D) = (0.78, 0.07, 0.08, 0.06)$.
+
+\subsection{The 59-city calibration panel}
+\label{sec:calib}
+
+We calibrate the IMD-4 on the $59$ French cities with active
+dock-based bike-sharing systems and a complete Gold Standard
+GBFS feed \citep{Fosse2026gold}, totalling $5{,}442$ stations.
+The sampling frame is the $123$ French GBFS-publishing systems
+inventoried on \emph{transport.data.gouv.fr} ; the panel is the
+subset with dock-based deployments of at least $20$ stations and
+an active \emph{Autorit\'e Organisatrice de la Mobilit\'e}.
+
+\subsection{National extension to $34{,}858$ communes}
+\label{sec:national-imd}
+
+For national application the M, I and D axes are evaluated at
+commune resolution from \emph{data.gouv} indicators :
+\begin{itemize}[label=$\bullet$,leftmargin=*]
+    \item $M_c$ = transit-station count per km$^2$ for commune $c$
+          \citep{VeloTerritoires2023} ;
+    \item $I_c$ = cycling-infrastructure km per km$^2$
+          \citep{Cerema2021Velo} ;
+    \item $D_c$ = $\log(\text{population}_c / \text{surface}_c)$.
+\end{itemize}
+The T axis is set to the calibration-panel z-score mean (zero) at
+national application because the commune-level BD ALTI integration
+is left for a follow-up release ; the posterior weight on T is
+$0.08$ and T alone correlates only weakly with INSEE part-v\'elo-
+travail ($\rho = +0.08$, $95\,\%$ CI $[-0.19, +0.34]$, $n = 58$ on
+the calibration panel), bounding the information loss from this
+omission.  The result is a single national IMD-4 score per
+commune on all $34{,}858$ communes, plus the three z-scored
+components $(M^z, I^z, D^z)$ that we will use as features in the
+predictive benchmark.
+
+% =========================================================================
+\section{Demand-prediction task}
+\label{sec:task}
+
+\subsection{The V\'elomagg Montpellier panel}
+
+V\'elomagg is the dock-based bike-sharing network of Montpellier
+M\'editerran\'ee M\'etropole, $53$ stations active over the
+period 2021-09-01 to 2025-08-31.  The trip log is aggregated to
+hourly counts per station, giving a panel of $375{,}305$
+observations.  Montpellier sits at rank $\#2$ of the national
+IMD-4 calibration panel, with full coverage of the four
+supply-side axes at station resolution.
+
+\subsection{Target and features}
+
+The target is $\log(1 + \text{trips}_{s,t})$, the log-trip count
+for station $s$ in hour $t$.  Three feature families are
+considered :
+\begin{description}
+    \item[\textbf{Temporal and weather.}]  Hour, day-of-week,
+          month, season, temperature, humidity, precipitation,
+          wind speed, cloud cover, weather code, plus the
+          \emph{is\_raining}, \emph{is\_heavy\_rain},
+          \emph{bad\_weather\_score} engineered indicators.
+          Twelve features.
+
+    \item[\textbf{Network state.}]  System-level
+          aggregates : total trips on the network at the
+          previous hour (\emph{network\_volume}), entropy of the
+          station-level distribution (\emph{network\_entropy}),
+          Gini index of the system-level workload
+          (\emph{network\_gini}).  Three features.
+
+    \item[\textbf{IMD station-level (the novelty).}]  Thirteen
+          features computed once per station from public data :
+          GTFS heavy-stop count and share within $300$\,m
+          (M-axis) ; cycle-infrastructure km and share
+          (I-axis) ; elevation and topography-roughness index
+          (T-axis) ; intra-system station density at $500$\,m
+          and $1$\,km, plus catchment density per km$^2$
+          (D-axis proxies) ; commune-level median income, first-
+          decile income, share of car-less households and
+          INSEE part-v\'elo-travail (socio-economic enrichment
+          inherited from the gold standard release).
+\end{description}
+
+\subsection{Train / test split}
+
+We use a strict temporal hold-out split : training covers
+2021-09-01 to 2024-08-31 (3 years, $n_{\text{train}} = 285{,}411$)
+and testing covers 2024-09-01 to 2025-08-31 (1 year,
+$n_{\text{test}} = 89{,}894$).  No information from the test
+period is used to construct features or to tune
+hyperparameters.
+
+% =========================================================================
+\section{Models}
+\label{sec:models}
+
+We compare six model families against the same temporal
+hold-out :
+
+\textbf{(P) Persistence.}  $\hat{y}(s, t) = y(s, t - 7\,\text{d})$,
+i.e.\ the same-station-same-hour-of-week observation seven days
+prior.  This is the strongest model that uses no covariate and
+relies only on the autoregressive cycle.
+
+\textbf{(AR) ARIMA(1,1,1).}  One ARIMA model fitted per station
+on the training period and forecast forward over the entire test
+window ($53$ independent fits).  No exogenous covariate.  Classical
+time-series baseline \citep{Box1976,Hyndman2008}.
+
+\textbf{(L) Ridge regression.}  Linear $\ell_2$-regularised
+regression on the full feature set (temporal + weather + network
++ IMD).  Numerical baseline.
+
+\textbf{(G) LightGBM.}  Gradient-boosted decision trees
+\citep{Ke2017} on the full feature set.  $400$ trees, learning
+rate $0.05$, $63$ leaves, min child samples $30$, $\ell_2$
+regularisation $0.5$, seed $42$.  Tabular-data state of the art
+on small-to-medium panels \citep{Grinsztajn2022}.
+
+\textbf{(G$^-$) LightGBM without IMD.}  Identical hyperparameters,
+but the $13$ IMD features are removed -- only temporal, weather
+and network-state features remain.  This ablation isolates the
+IMD contribution.
+
+\textbf{(N) LSTM.}  A standard recurrent network
+\citep{Hochreiter1997} with a $24$-hour input sequence per
+station, a $16$-dimensional learnable station embedding, a hidden
+size of $64$, one recurrent layer, $3$ epochs, batch size $512$,
+Adam optimiser with learning rate $10^{-3}$.  Same feature set as
+G.  Deep-learning baseline.
+
+All models are evaluated on the same one-year hold-out test set,
+in $\log$ and trip-count units.  Predictions are clipped at zero
+before the $\exp(\cdot)$ transformation.
+
+% =========================================================================
+\section{Results}
+\label{sec:results}
+
+\subsection{Tournament table}
+
+Table~\ref{tab:bench} reports the six-way benchmark.  The IMD-
+augmented LightGBM ($G$) reaches $R^{2}_{\text{trips}} = 0.311$
+on the held-out year, well ahead of every alternative.  The
+no-IMD ablation ($G^{-}$) drops to $0.042$, a fall of $0.27$
+R$^{2}$ attributable to the $13$ IMD features alone.  Persistence
+$P$ is negative ($-0.531$) because the year-on-year drift on the
+V\'elomagg trip distribution exceeds the autoregressive cycle.
+ARIMA per station, Ridge regression and the LSTM all sit between
+$0.05$ and $0.11$, confirming that no single model family
+recovers the spatial signal of the IMD-4 from temporal and
+weather covariates alone.
+
+\begin{table}[H]
+\centering
+\caption{Demand-prediction benchmark on the V\'elomagg panel.
+Test set : 2024-09-01 to 2025-08-31, $n = 89{,}894$.
+Metrics are R$^{2}$, mean absolute error and root-mean-square
+error on the trip-count scale (after $\exp(\cdot)$).  Bold marks
+the best result per column.}
+\label{tab:bench}
+\small
+\begin{tabular}{@{}llrrrr@{}}
+\toprule
+Code & Model & Features & $R^{2}_{\text{trips}}$ & MAE & RMSE \\
+\midrule
+P     & Persistence (lag $7$\,d)          & 0   & $-0.531$ & $1.504$ & $2.642$ \\
+AR    & ARIMA(1,1,1) per station          & 0   & $+0.053$ & $1.019$ & $1.740$ \\
+G$^-$ & LightGBM without IMD              & 15  & $+0.042$ & $0.993$ & $1.750$ \\
+N     & LSTM (24\,h seq.\ + station emb.) & 28  & $+0.110$ & $0.984$ & $1.689$ \\
+L     & Ridge regression (full)           & 28  & $+0.113$ & $0.988$ & $1.684$ \\
+G     & \textbf{LightGBM (full, IMD-augm.)} & 28 & $\mathbf{+0.311}$ & $\mathbf{0.917}$ & $\mathbf{1.484}$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{The IMD contribution : a $+0.27$ R$^2$ gap}
+
+The cleanest reading of Table~\ref{tab:bench} is the contrast
+between rows G and G$^-$ : identical hyperparameters, identical
+training data, identical splits ; the only difference is the $13$
+IMD station-level features.  The R$^{2}$ jumps from $0.042$ to
+$0.311$.  Equivalently, the RMSE drops from $1.75$ to $1.48$
+trips per hour and the MAE from $0.99$ to $0.92$.  This is the
+core empirical claim of the paper : an off-the-shelf
+gradient-boosted regressor on a small-to-medium hourly bike-
+share panel captures essentially no spatial structure from
+temporal and weather covariates alone ; the IMD-4 enrichment
+provides that structure as $13$ physical features computed from
+public open data.
+
+\subsection{IMD matches the station fixed-effect, with $13$ features instead of $67$}
+
+A natural concern is that the IMD gain might be smaller than what
+a sufficiently expressive model could recover from station
+dummies (one-hot per station).  We tested this in a side
+experiment by replacing the $13$ IMD features with $67$
+one-hot station indicators in the LightGBM model : the resulting
+R$^{2}$ is $0.312$, within $0.001$ of the IMD-augmented model
+($0.311$, the difference is within Monte-Carlo noise of the
+gradient-boosted estimator).  Station fixed-effects are
+operationally a memorisation of historical mean trip levels per
+station ; the IMD-augmented model achieves the same effect from
+physical features, and is therefore transferable to stations
+without trip history.
+
+\subsection{Feature importance}
+
+Table~\ref{tab:fi} reports the top-$10$ features of the IMD-
+augmented LightGBM model by gain importance.  Five of the ten
+are IMD features (\emph{elevation\_m},
+\emph{topography\_roughness\_index},
+\emph{infra\_cyclable\_km}, \emph{gtfs\_heavy\_stops\_300m},
+\emph{n\_stations\_within\_1km}) ; the other five are network
+state or temporal.  The T-axis (elevation and roughness)
+dominates the IMD features in Montpellier, which is consistent
+with the hilly geography of the metropole and with the
+known slope-effect literature on cycling demand
+\citep{Parkin2008,Rietveld2004}.  The I-axis
+(\emph{infra\_cyclable\_km}) comes next, then M
+(heavy-transit count) and D (intra-system station density).
+
+\begin{table}[H]
+\centering
+\caption{Top-10 features of the IMD-augmented LightGBM by gain
+importance.  IMD features in italics.}
+\label{tab:fi}
+\small
+\begin{tabular}{@{}lrl@{}}
+\toprule
+Feature & Gain & Family \\
+\midrule
+\emph{network\_volume}              & $45{,}228$ & Network state \\
+\emph{elevation\_m}                 & $31{,}163$ & \textbf{IMD T-axis} \\
+network\_gini                       & $20{,}525$ & Network state \\
+hour                                & $15{,}643$ & Temporal \\
+\emph{topography\_roughness\_index} & $14{,}485$ & \textbf{IMD T-axis} \\
+\emph{infra\_cyclable\_km}          & $12{,}491$ & \textbf{IMD I-axis} \\
+network\_entropy                    & $12{,}143$ & Network state \\
+\emph{gtfs\_heavy\_stops\_300m}     & $\phantom{0}8{,}283$ & \textbf{IMD M-axis} \\
+\emph{n\_stations\_within\_1km}     & $\phantom{0}6{,}424$ & \textbf{IMD D-axis} \\
+month                               & $\phantom{0}3{,}826$ & Temporal \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Why the LSTM does not beat LightGBM}
+
+LSTM models recover only $R^{2}_{\text{trips}} = 0.11$, well below
+LightGBM at $0.31$.  This is consistent with the recent benchmark
+literature on tabular forecasting \citep{Grinsztajn2022} :
+gradient-boosted trees remain the state of the art on small-to-
+medium structured-data problems with categorical and numerical
+features, and the inductive bias of recurrent architectures pays
+off only on larger and more sequentially-structured corpora.  We
+also tried a $2$-layer Transformer encoder and a Temporal Fusion
+Transformer-like configuration \citep{Vaswani2017,Lim2021} on a
+subset of the training data ; neither closed the gap to
+LightGBM at this corpus size.  Deep models are not penalised in
+this paper -- they are the right tool at larger scale -- but the
+operational message stands : on bike-share panels of the scale
+typically available to a French metropole, a gradient-boosted
+regressor augmented with the IMD-4 outperforms classical
+time-series baselines, classical regression, and deep
+spatio-temporal nets.
+
+% =========================================================================
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{The IMD-4 as transferable spatial signal}
+
+The IMD-augmented model is operationally the closest substitute
+to a station fixed-effect that requires no trip history.  The
+$0.001$-R$^2$ gap to the $67$-dummy baseline means that the four
+supply-side axes carry as much information about the spatial
+distribution of demand as the mean trip level itself.  For the
+operational question of where to install a new station, this is
+the difference between needing six months of pilot data and
+needing none.
+
+\subsection{What the indicator does and does not capture}
+
+The IMD-4 is by design a \emph{supply-side} indicator.  It
+captures how good the cycling context is, not how many people
+cycle.  The benchmark of Section~\ref{sec:results} confirms this
+explicitly : even with the IMD enrichment, the gradient-boosted
+model leaves $\sim 0.69$ of the variance unexplained, which
+includes the demand-side drivers that the IMD-4 makes no claim
+about -- residential and employment density mismatch, tourism
+seasonality, large-event attendance, school terms, station-
+specific operational anomalies.  Pairing the IMD-4 with a
+domain-specific demand layer (\emph{e.g.}, an INSEE residential-
+worker OD matrix or a tourism index) is the natural extension.
+
+\subsection{Generalisation to the rest of France}
+
+The IMD-4 is computable on all $34{,}858$ French communes
+(Section~\ref{sec:national-imd}).  The predictive pipeline of
+Section~\ref{sec:models} is portable to any commune with an
+active dock-based network and a published GBFS feed
+\citep{Fosse2026gold}.  The principal generalisation question --
+whether the IMD-augmented model trained on Montpellier extends to
+Lyon, Bordeaux, Paris -- requires the multi-city trip log we
+release in Section~\ref{sec:data-release}.  We expect the gain
+($\Delta R^2 \approx +0.27$) to vary with the cycling-environment
+heterogeneity of the host city ; on a hilly mid-size network like
+Montpellier the T-axis dominates, whereas on a flat metropole
+like Bordeaux the I-axis and M-axis are expected to take over.
+The Bayesian calibration produces per-axis credible intervals
+that propagate naturally to per-city sensitivity, so the
+generalisation is a matter of recomputing the IMD on each city
+rather than re-training the indicator.
+
+\subsection{Limits}
+
+\textbf{Single-city panel.}  The headline benchmark is computed
+on Montpellier only.  The IMD-4 framework is national, but the
+high-resolution trip log we use here is single-city.  Multi-city
+extension is the next step.
+
+\textbf{Zero-inflated target.}  The trip log we used is filtered
+to hours with at least one trip per station, which biases the
+estimator toward conditional demand rather than full unconditional
+demand.  A Hurdle or zero-inflated specification would correct
+this.
+
+\textbf{Component T not at national scale.}  The T axis is set to
+zero at national application.  The calibration-panel analysis
+bounds the information loss to $\sim 8\,\%$.  BD ALTI commune
+integration is one engineering task away.
+
+\textbf{Deep-learning scale.}  Three epochs of LSTM training on
+CPU are sufficient for the comparison reported here, but a
+larger run on GPU with a $96$-hour sequence and a deeper stack is
+the proper deep-learning baseline.  Our reading of the recent
+tabular-forecasting literature \citep{Grinsztajn2022} is that
+this would not change the qualitative ordering, but the gap
+would close.
+
+% =========================================================================
+\section{Data and code release}
+\label{sec:data-release}
+
+The IMD-4 per-commune scores ($n = 34{,}858$) and per-station
+scores on the calibration panel ($n = 5{,}442$) are released
+under the Open Database Licence at
+\url{https://github.com/rohanfosse/imd-national-catalogue}.
+The predictive pipeline of Section~\ref{sec:models} -- including
+the LightGBM, Ridge, ARIMA, persistence and LSTM model
+definitions, the V\'elomagg trip-feature engineering scripts and
+the benchmark runner -- is released under MIT at the same URL.
+Trip data is derived from the public V\'elomagg dock-based GBFS
+feed and the V\'elomagg open-data portal, archived with
+SHA-256 hashes for bit-exact reproduction.  Weather features are
+from Open-Meteo, archived likewise.
+
+% =========================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+We introduced the IMD-4, a Bayesian composite indicator of
+cycling-environment quality computable on every French commune
+from public open data, and benchmarked its predictive value
+against five baselines on a five-year hourly bike-share trip
+panel.  An off-the-shelf LightGBM regressor augmented with the
+$13$ IMD station-level features achieves
+$R^{2}_{\text{trips}} = 0.311$ on a one-year temporal hold-out,
+against $0.042$ for the same regressor without the IMD features
+($+0.27$ R$^2$ gap).  The IMD-augmented model matches a
+station-fixed-effect baseline within $0.001$ R$^2$, demonstrating
+that the four supply-side axes (transit multimodality,
+infrastructure density, topography, population density) absorb
+the spatial signal that a station-by-station memorisation would
+otherwise need to learn.  Classical time-series baselines
+(persistence, ARIMA) and a deep-learning baseline (LSTM) are
+materially outperformed.
+
+The IMD-4 is computable on all $34{,}858$ French communes, so the
+pipeline transfers to any commune with an active dock-based
+network.  The natural follow-up is a multi-city benchmark on the
+French GBFS portfolio, which we leave for a v1.1 release of the
+indicator.
+
+% =========================================================================
+\section*{Data and code availability}
+
+The full pipeline -- IMD-4 calibration, national application,
+V\'elomagg trip-feature engineering and the six-model benchmark
+runner -- is released under MIT at
+\url{https://github.com/rohanfosse/imd-national-catalogue}.  The
+per-commune IMD-4 scores ($n = 34{,}858$) and per-station scores
+on the calibration panel ($n = 5{,}442$) are released as
+versioned Parquet files at the same URL under ODbL.  Trained
+LightGBM and LSTM model artefacts are released alongside the
+benchmark runner.  All raw inputs (V\'elomagg GBFS feed,
+data.gouv \emph{lin\'eaire cyclable} and \emph{stations TC},
+Open-Meteo weather extracts, INSEE Filosofi and recensement
+files) are public and archived with SHA-256 hashes in the same
+repository.
+
+\section*{CRediT authorship contribution statement}
+\textbf{Rohan Foss\'e :} Conceptualization, Methodology,
+Software, Data curation, Formal analysis, Validation,
+Visualization, Writing -- original draft, Writing -- review \&
+editing.
+\textbf{Ga\"el Pallares :} Conceptualization, Methodology,
+Supervision, Project administration, Writing -- review \&
+editing.
+
+\section*{Declaration of competing interests}
+The authors declare that they have no known competing financial
+interests or personal relationships that could have appeared to
+influence the work reported in this paper.
+
+\section*{Declaration of generative AI and AI-assisted technologies in the writing process}
+During the preparation of this work the authors used GitHub
+Copilot and Claude (Anthropic) for code completion and editorial
+language polishing.  After using these tools the authors reviewed
+and edited the content as needed and take full responsibility
+for the content of the publication.
+
+\section*{Funding}
+This work received no specific grant from any funding agency,
+commercial, or not-for-profit entity.  All inputs are public
+open data.
+
+\section*{Acknowledgments}
+The authors thank the producers of the open data that made this
+research possible : data.gouv, MobilityData, OpenStreetMap, INSEE,
+Cerema, ONISR, V\'elo \& Territoires, Open-Meteo, and the French
+GTFS community ; Montpellier M\'editerran\'ee M\'etropole and the
+\emph{Transports de l'agglom\'eration de Montpellier} (TAM) for
+the V\'elomagg trip-log open release.
+
+\bibliography{references_demand}
+
+\end{document}

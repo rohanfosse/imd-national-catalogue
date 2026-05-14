@@ -1,0 +1,51 @@
+{
+  "experiment": "d1_demand_model",
+  "data": {
+    "n_total": 375305,
+    "n_stations": 53,
+    "n_train": 285411,
+    "n_test": 89894,
+    "train_span": "2021-09-01 00:00:00 to 2024-08-31 23:00:00",
+    "test_span": "2024-09-01 00:00:00 to 2025-08-31 23:00:00"
+  },
+  "models": [
+    {
+      "model": "A_temporal_only",
+      "n_test": 89894,
+      "r2_log": 0.08685884924238618,
+      "r2_trips": 0.04157681946821412,
+      "mae_trips": 0.9925312229725983,
+      "rmse_trips": 1.7501851402899105,
+      "mean_true": 1.960509043985138,
+      "mean_pred": 1.6588559221778418,
+      "fit_seconds": 8.3,
+      "n_features": 16
+    },
+    {
+      "model": "B_temporal_plus_station_FE",
+      "n_test": 89894,
+      "r2_log": 0.2242107238627653,
+      "r2_trips": 0.3123702289027288,
+      "mae_trips": 0.9149199727137808,
+      "rmse_trips": 1.4824589395609202,
+      "mean_true": 1.960509043985138,
+      "mean_pred": 1.6939630388174898,
+      "fit_seconds": 9.2,
+      "n_features": 17
+    },
+    {
+      "model": "C_imd_augmented",
+      "n_test": 89894,
+      "r2_log": 0.22483263196334158,
+      "r2_trips": 0.3109247632049186,
+      "mae_trips": 0.9167231039586249,
+      "rmse_trips": 1.4840162591392922,
+      "mean_true": 1.960509043985138,
+      "mean_pred": 1.6930853070351974,
+      "fit_seconds": 9.9,
+      "n_features": 29
+    }
+  ],
+  "delta_C_vs_A_r2_trips": 0.26934794373670445,
+  "delta_C_vs_B_r2_trips": -0.0014454656978102332
+}
