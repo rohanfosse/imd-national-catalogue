@@ -1,0 +1,28 @@
+{
+  "city": "chicago_divvy",
+  "n_total": 2348822,
+  "n_stations": 1345,
+  "n_train": 1879057,
+  "n_test": 469765,
+  "no_imd": {
+    "model": "chicago_divvy_G_minus_temporal",
+    "n_test": 469765,
+    "r2_log": 0.07500677451084214,
+    "r2_trips": 0.06202717447304007,
+    "mae_trips": 1.215304009412281,
+    "rmse_trips": 2.144098739583716,
+    "fit_seconds": 11.4
+  },
+  "imd_augmented": {
+    "model": "chicago_divvy_G_plus_imd",
+    "n_test": 469765,
+    "r2_log": 0.36877314253811544,
+    "r2_trips": 0.41130152045746726,
+    "mae_trips": 1.0011267200982403,
+    "rmse_trips": 1.6986195193615934,
+    "fit_seconds": 18.3
+  },
+  "delta_r2_trips": 0.3492743459844272,
+  "delta_mae_trips": 0.21417728931404056,
+  "wall_time_s": 54.5
+}

@@ -1,0 +1,28 @@
+{
+  "city": "sf_baywheels",
+  "n_total": 2581278,
+  "n_stations": 560,
+  "n_train": 2065022,
+  "n_test": 516256,
+  "no_imd": {
+    "model": "sf_baywheels_G_minus_temporal",
+    "n_test": 516256,
+    "r2_log": 0.09362871341008439,
+    "r2_trips": 0.004128602383530522,
+    "mae_trips": 1.5390346416768494,
+    "rmse_trips": 2.815612250001543,
+    "fit_seconds": 12.1
+  },
+  "imd_augmented": {
+    "model": "sf_baywheels_G_plus_imd",
+    "n_test": 516256,
+    "r2_log": 0.4026912385570173,
+    "r2_trips": 0.3099493445391035,
+    "mae_trips": 1.2622765236698,
+    "rmse_trips": 2.3437522543977254,
+    "fit_seconds": 16.4
+  },
+  "delta_r2_trips": 0.305820742155573,
+  "delta_mae_trips": 0.2767581180070495,
+  "wall_time_s": 49.2
+}

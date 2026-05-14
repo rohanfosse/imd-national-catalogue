@@ -1,0 +1,28 @@
+{
+  "city": "boston_bluebikes",
+  "n_total": 2901955,
+  "n_stations": 497,
+  "n_train": 2321564,
+  "n_test": 580391,
+  "no_imd": {
+    "model": "boston_bluebikes_G_minus_temporal",
+    "n_test": 580391,
+    "r2_log": 0.11317813411849675,
+    "r2_trips": 0.06906153422910344,
+    "mae_trips": 1.8421087732388608,
+    "rmse_trips": 3.1744126379942075,
+    "fit_seconds": 11.0
+  },
+  "imd_augmented": {
+    "model": "boston_bluebikes_G_plus_imd",
+    "n_test": 580391,
+    "r2_log": 0.49527597449301297,
+    "r2_trips": 0.556992338465895,
+    "mae_trips": 1.3592360488183661,
+    "rmse_trips": 2.189820465925828,
+    "fit_seconds": 17.3
+  },
+  "delta_r2_trips": 0.4879308042367916,
+  "delta_mae_trips": 0.48287272442049467,
+  "wall_time_s": 53.8
+}
