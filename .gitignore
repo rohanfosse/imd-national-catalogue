@@ -74,3 +74,6 @@ paper_demand/data_collection/tier1_trip_logs/
 
 # OSM cache (regenerable via Overpass)
 paper_demand/data_collection/_cache_osm/
+
+# Vacation orchestrator runtime logs (regenerable; can be huge)
+paper_demand/scripts/_vacation_logs/
